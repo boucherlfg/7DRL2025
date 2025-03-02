@@ -1,0 +1,56 @@
+#
+# La documentation pour la syntaxe des configs de workflow .yml:
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestbranchestags 
+#
+
+name: Build Project
+env:
+  project_path: 7DRL
+on: 
+    push:
+      branches:
+        - main
+        # - dev
+jobs:
+  build:
+    name: Build Project and Publish to itch.io ✨
+    runs-on: ubuntu-latest
+    # This stops builds that are in-progress once a new commit comes in
+    concurrency: 
+      group: unity-build
+      cancel-in-progress: true
+    steps:
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+            lfs: true
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.project_path }}/Library
+          key: ${{ env.project_path }}/Library
+      # Build
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.project_path }}
+          targetPlatform: WebGL
+       # Output
+      - uses: actions/upload-artifact@v4
+        with:
+           name: Build
+           projectPath: ${{ env.project_path }}/build
+           path: ${{ env.project_path }}/build
+        # Upload to Itch
+      - uses: josephbmanley/butler-publish-itchio-action@master
+        env:
+           BUTLER_CREDENTIALS: ${{ secrets.BUTLER_API_KEY }}
+           CHANNEL: html5
+           ITCH_GAME: 7drl-2025
+           ITCH_USER: Conjure
+           PACKAGE: build/WebGL
