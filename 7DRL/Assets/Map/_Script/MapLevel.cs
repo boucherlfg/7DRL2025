@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 public class MapLevel
 {
-    private int pointCount;
+    public List<MapNode> points = new List<MapNode>();
+    public const float MIN_DISTANCE = 2f;
+
     private float width;
     private float height;
-    public List<MapNode> points;
-
-    public const float MIN_DISTANCE = 2f;
+    private int pointCount;
 
     public MapLevel(int initialPoints, float mapWidth, float mapHeight)
     {
