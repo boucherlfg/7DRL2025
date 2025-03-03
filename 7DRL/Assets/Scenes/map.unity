@@ -259,8 +259,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapGenerator: {fileID: 1065883194}
-  distanceFromExistingPoints: 20
-  minDistanceBetweenPoints: 4
+  distanceFromExistingPoints: 7
+  minDistanceBetweenPoints: 3
 --- !u!114 &1065883194
 MonoBehaviour:
   m_ObjectHideFlags: 0

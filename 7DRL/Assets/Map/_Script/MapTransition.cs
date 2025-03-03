@@ -7,7 +7,7 @@ public class MapTransition : MonoBehaviour
     public MapGenerator mapGenerator;
     public float distanceFromExistingPoints;
     public float minDistanceBetweenPoints;
-    private const int TARGET_POINTS = 10;
+    private const int TARGET_POINTS = 20;
     private const int MAX_CONNECTIONS = 5;
 
     public void TransitionToNewLevel(List<MapNode> edgeNodes)
@@ -70,40 +70,61 @@ public class MapTransition : MonoBehaviour
 
     private Vector3 GetValidPosition(Vector3 originPosition, List<MapNode> existingNodes)
     {
-        Vector3 newPosition;
-        int maxAttempts = 20;  // Increased attempts to find valid position
-        int attempts = 0;
+        Vector3 bestPosition = originPosition;
+        float bestScore = float.MinValue;
+        int numAngles = 16;  // Nombre d'angles à tester
+        int numDistances = 5; // Nombre de distances à tester
 
-        do
+        float maxPossibleDistance = GetMaxPossibleDistance(originPosition);
+
+        for (int i = 0; i < numAngles; i++)
         {
-            float angle = Random.Range(0f, 360f);
-            // Reduce the maximum distance if we're near the map edge
-            float maxPossibleDistance = GetMaxPossibleDistance(originPosition);
-            float distance = Mathf.Min(distanceFromExistingPoints, maxPossibleDistance) * Random.Range(0.8f, 1f);
-            Vector3 direction = Quaternion.Euler(0, 0, angle) * Vector3.right;
-            newPosition = originPosition + direction * distance;
-
-            attempts++;
-            if (attempts >= maxAttempts)
+            float angle = (360f / numAngles) * i;
+            for (int j = 0; j < numDistances; j++)
             {
-                // If we can't find a valid position, try closer to the origin
-                distance *= 0.5f;
-                newPosition = originPosition + direction * distance;
-                
-                if (!IsPositionValid(newPosition, existingNodes))
+                float distance = maxPossibleDistance * ((j + 1f) / numDistances);
+                Vector3 direction = Quaternion.Euler(0, 0, angle) * Vector3.right;
+                Vector3 testPosition = originPosition + direction * distance;
+
+                if (IsPositionValid(testPosition, existingNodes))
                 {
-                    newPosition = new Vector3(
-                        Mathf.Clamp(newPosition.x, -mapGenerator.mapWidth/2f, mapGenerator.mapWidth/2f),
-                        Mathf.Clamp(newPosition.y, -mapGenerator.mapHeight/2f, mapGenerator.mapHeight/2f),
-                        0f
-                    );
+                    // Calcul du score pour cette position
+                    float score = EvaluatePosition(testPosition, originPosition, existingNodes);
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestPosition = testPosition;
+                    }
                 }
-                break;
             }
+        }
 
-        } while (!IsPositionValid(newPosition, existingNodes));
+        return bestPosition;
+    }
 
-        return newPosition;
+    private float EvaluatePosition(Vector3 position, Vector3 originPosition, List<MapNode> existingNodes)
+    {
+        float score = 0f;
+        
+        // Distance par rapport au point d'origine
+        float distanceFromOrigin = Vector3.Distance(position, originPosition);
+        float maxDistance = GetMaxPossibleDistance(originPosition);
+        
+        if (existingNodes.Count > 0)
+        {
+            // Pénalise les positions trop éloignées du centre
+            float distanceRatio = distanceFromOrigin / maxDistance;
+            score = -distanceRatio + Random.Range(-0.2f, 0.2f);
+        }
+        else
+        {
+            // Pour le premier point, on garde une distance modérée
+            float idealDistance = maxDistance * 0.4f;
+            float distanceDiff = Mathf.Abs(distanceFromOrigin - idealDistance);
+            score = -distanceDiff + Random.Range(-0.1f, 0.1f);
+        }
+        
+        return score;
     }
 
     private float GetMaxPossibleDistance(Vector3 origin)
