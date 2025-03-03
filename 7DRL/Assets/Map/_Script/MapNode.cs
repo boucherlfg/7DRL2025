@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class MapNode : MonoBehaviour
 {
@@ -32,7 +33,10 @@ public class MapNode : MonoBehaviour
     public void SetVisibility(int currentLevel)
     {
         var spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null) spriteRenderer.enabled = true;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = level <= currentLevel;
+        }
 
         if (transform.parent != null)
         {
@@ -41,10 +45,35 @@ public class MapNode : MonoBehaviour
                 LineRenderer line = child.GetComponent<LineRenderer>();
                 if (line != null && IsConnectedToLine(line))
                 {
-                    line.enabled = true;
+                    // Only show lines connecting nodes of visible levels
+                    Vector3 start = line.GetPosition(0);
+                    Vector3 end = line.GetPosition(1);
+                    
+                    MapNode startNode = GetNodeAtPosition(start);
+                    MapNode endNode = GetNodeAtPosition(end);
+                    
+                    if (startNode != null && endNode != null)
+                    {
+                        line.enabled = startNode.level <= currentLevel && endNode.level <= currentLevel;
+                    }
                 }
             }
         }
+    }
+
+    private MapNode GetNodeAtPosition(Vector3 position)
+    {
+        if (transform.parent == null) return null;
+        
+        foreach (Transform child in transform.parent)
+        {
+            MapNode node = child.GetComponent<MapNode>();
+            if (node != null && Vector3.Distance(node.transform.position, position) < 0.1f)
+            {
+                return node;
+            }
+        }
+        return null;
     }
 
     private bool IsConnectedToLine(LineRenderer line)

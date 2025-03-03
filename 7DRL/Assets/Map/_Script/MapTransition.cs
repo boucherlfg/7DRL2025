@@ -7,15 +7,30 @@ public class MapTransition : MonoBehaviour
     public MapGenerator mapGenerator;
     public float distanceFromExistingPoints;
     public float minDistanceBetweenPoints;
-    private const int TARGET_POINTS = 20;
+    private const int POINTS_PER_LEVEL = 10;
     private const int MAX_CONNECTIONS = 5;
+
+    private float currentWidth;
+    private float currentHeight;
+
+    public void SetCurrentMapSize(float width, float height)
+    {
+        currentWidth = width;
+        currentHeight = height;
+    }
 
     public void TransitionToNewLevel(List<MapNode> edgeNodes)
     {
-        // Calculate exact number of points needed
-        int totalPointsNeeded = TARGET_POINTS - 1; // -1 for center node
-        int pointsPerNode = totalPointsNeeded / edgeNodes.Count;
-        int remainingPoints = totalPointsNeeded % edgeNodes.Count;
+        // Calculate points to add for this level
+        int pointsToAdd = POINTS_PER_LEVEL;
+        
+        // Create new level with the additional points
+        MapLevel newLevel = new MapLevel(POINTS_PER_LEVEL, currentWidth, currentHeight);
+        mapGenerator.AddLevel(newLevel);
+
+        // Distribute points among edge nodes
+        int pointsPerNode = pointsToAdd / edgeNodes.Count;
+        int remainingPoints = pointsToAdd % edgeNodes.Count;
 
         foreach (MapNode edgeNode in edgeNodes)
         {
@@ -25,7 +40,7 @@ public class MapTransition : MonoBehaviour
                 pointsToGenerate++;
                 remainingPoints--;
             }
-            GenerateNewPointsAroundEdgeNode(edgeNode, pointsToGenerate);
+            GenerateNewPointsAroundEdgeNode(edgeNode, pointsToGenerate, newLevel);
         }
     }
 
@@ -146,7 +161,7 @@ public class MapTransition : MonoBehaviour
         return Mathf.Sqrt(horizontalDist * horizontalDist + verticalDist * verticalDist);
     }
     
-    private void GenerateNewPointsAroundEdgeNode(MapNode edgeNode, int exactPointCount)
+    private void GenerateNewPointsAroundEdgeNode(MapNode edgeNode, int exactPointCount, MapLevel targetLevel)
     {
         List<MapNode> newNodes = new List<MapNode>();
         
@@ -157,6 +172,7 @@ public class MapTransition : MonoBehaviour
             MapNode newNode = mapGenerator.CreatePointNode(newPosition);
             newNode.level = edgeNode.level + 1;
             newNodes.Add(newNode);
+            targetLevel.points.Add(newNode);  // Add to the target level
         }
 
         // Create minimum spanning tree to ensure connectivity
