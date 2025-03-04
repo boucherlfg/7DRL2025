@@ -12,23 +12,35 @@ public class MapGenerator : MonoBehaviour
     private int currentLevel = 1;
     private List<MapLevel> levels = new List<MapLevel>();
     private const float SIZE_INCREASE_PER_LEVEL = 20f;
-
-
-    void Start()
+    
+    private void Start()
     {
         if (!ValidateComponents()) return;
         InitializeMap();
     }
+    
+    public MapNode CreatePointNode(Vector3 position)
+    {
+        var pointObj = Instantiate(pointPrefab, position, Quaternion.identity);
+        var node = pointObj.GetComponent<MapNode>();
+        node.position = position;
+        node.transform.parent = transform;
+        node.connections = new List<MapNode>();
+        node.level = 0;  // Initialiser à 0 pour détecter les problèmes de niveau non défini
+        Debug.Log($"Creating new node with initial level 0");
+        
+        return node;
+    }
 
     private bool ValidateComponents()
     {
-        if (pointPrefab == null || linePrefab == null)
+        if (pointPrefab is null || linePrefab is null)
         {
             Debug.LogError("Missing prefabs!");
             return false;
         }
         
-        if (GetComponent<MapTransition>() == null)
+        if (GetComponent<MapTransition>() is null)
         {
             Debug.LogError("MapTransition component is required!");
             return false;
@@ -41,17 +53,17 @@ public class MapGenerator : MonoBehaviour
         levels.Add(level);
     }
 
-    void InitializeMap()
+    private void InitializeMap()
     {
         currentLevel = 1;
-        float initialWidth = mapWidth;
-        float initialHeight = mapHeight;
-        MapLevel initialLevel = new MapLevel(1, initialWidth, initialHeight);
+        var initialWidth = mapWidth;
+        var initialHeight = mapHeight;
+        var initialLevel = new MapLevel(1, initialWidth, initialHeight);
         levels.Add(initialLevel);
         
         // Create center node with no initial connections
-        Vector3 centerPosition = Vector3.zero;
-        MapNode centerNode = CreatePointNode(centerPosition);
+        var centerPosition = Vector3.zero;
+        var centerNode = CreatePointNode(centerPosition);
         centerNode.level = 1;  // Forcer explicitement le niveau 1
         initialLevel.points.Add(centerNode);
 
@@ -62,77 +74,68 @@ public class MapGenerator : MonoBehaviour
         mapTransition.TransitionToNewLevel(new List<MapNode> { centerNode });
     }
 
-    public MapNode CreatePointNode(Vector3 position)
-    {
-        GameObject pointObj = Instantiate(pointPrefab, position, Quaternion.identity);
-        MapNode node = pointObj.GetComponent<MapNode>();
-        node.position = position;
-        node.transform.parent = transform;
-        node.connections = new List<MapNode>();
-        node.level = 0;  // Initialiser à 0 pour détecter les problèmes de niveau non défini
-        Debug.Log($"Creating new node with initial level 0");
-        return node;
-    }
+    
 
-    private Vector3 FindOptimalPosition(List<MapNode> existingNodes, float currentWidth, float currentHeight)
+    private static Vector3 FindOptimalPosition(List<MapNode> existingNodes, float currentWidth, float currentHeight)
     {
-        float bestScore = float.MinValue;
-        Vector3 bestPosition = Vector3.zero;
-        int attempts = 30;
+        var bestScore = float.MinValue;
+        var bestPosition = Vector3.zero;
+        var attempts = 30;
         
-        float halfWidth = currentWidth / 2f;
-        float halfHeight = currentHeight / 2f;
+        var halfWidth = currentWidth / 2f;
+        var halfHeight = currentHeight / 2f;
         
-        for (int i = 0; i < attempts; i++)
+        for (var i = 0; i < attempts; i++)
         {
-            Vector3 candidatePos = new Vector3(
+            var candidatePos = new Vector3(
                 Random.Range(-halfWidth, halfWidth),
                 Random.Range(-halfHeight, halfHeight),
                 0f
             );
             
-            float score = EvaluatePosition(candidatePos, existingNodes);
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestPosition = candidatePos;
-            }
+            var score = EvaluatePosition(candidatePos, existingNodes);
+            
+            if(score <= bestScore) continue;
+
+            bestScore = score;
+            bestPosition = candidatePos;
+            
         }
         
         return bestPosition;
     }
     
-    private float EvaluatePosition(Vector3 position, List<MapNode> existingNodes)
+    private static float EvaluatePosition(Vector3 position, List<MapNode> existingNodes)
     {
         if (existingNodes == null || existingNodes.Count == 0)
             return 1f;
 
-        float minDistance = float.MaxValue;
-        float maxDistance = 0f;
+        var minDistance = float.MaxValue;
+        var maxDistance = 0f;
         
-        foreach (var node in existingNodes)
-        {
-            if (node == null) continue;
-            float dist = Vector3.Distance(position, node.position);
-            minDistance = Mathf.Min(minDistance, dist);
-            maxDistance = Mathf.Max(maxDistance, dist);
-        }
+        var distances = existingNodes
+            .Where(node => node is not null)
+            .Select(node => Vector3.Distance(position, node.position))
+            .ToList();
+
+        minDistance = distances.Min();
+        maxDistance = distances.Max();
         
-        float optimalDistance = 3f;
-        float distanceScore = 1f - Mathf.Abs(minDistance - optimalDistance) / optimalDistance;
-        float spreadScore = maxDistance > 0 ? minDistance / maxDistance : 0f;
+        var optimalDistance = 3f;
+        var distanceScore = 1f - Mathf.Abs(minDistance - optimalDistance) / optimalDistance;
+        var spreadScore = maxDistance > 0 ? minDistance / maxDistance : 0f;
         
         return distanceScore * 0.7f + spreadScore * 0.3f;
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && currentLevel < maxLevels)
         {
             if (currentLevel - 1 < levels.Count)
             {
-                float currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
-                float currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+                var currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+                var currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
                 
                 // Collect all existing nodes
                 var allNodes = new List<MapNode>();
@@ -142,14 +145,14 @@ public class MapGenerator : MonoBehaviour
                 }
                 
                 // Create new level with 10 points
-                MapLevel newLevel = new MapLevel(10, currentWidth, currentHeight);
+                var newLevel = new MapLevel(10, currentWidth, currentHeight);
                 var newNodes = new List<MapNode>();
                 
                 // Generate 10 new points with optimal positions
-                for (int i = 0; i < 10; i++)
+                for (var i = 0; i < 10; i++)
                 {
-                    Vector3 newPosition = FindOptimalPosition(allNodes, currentWidth, currentHeight);
-                    MapNode newNode = CreatePointNode(newPosition);
+                    var newPosition = FindOptimalPosition(allNodes, currentWidth, currentHeight);
+                    var newNode = CreatePointNode(newPosition);
                     newNode.level = currentLevel + 1;
                     newNodes.Add(newNode);
                     allNodes.Add(newNode);
@@ -173,7 +176,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void ResetMap()
+    private void ResetMap()
     {
         // Destroy all child objects
         while (transform.childCount > 0)
@@ -185,21 +188,15 @@ public class MapGenerator : MonoBehaviour
         InitializeMap();
     }
 
-    void UpdateVisibility()
+    private void UpdateVisibility()
     {
-        if (levels == null) return;
-        
-        foreach (var level in levels)
+        levels?.ForEach(level =>
         {
-            if (level == null) continue;
-            foreach (var node in level.points)
+            level?.points?.ForEach(node =>
             {
-                if (node != null)
-                {
-                    node.SetVisibility(currentLevel);
-                }
-            }
-        }
+                node?.SetVisibility(currentLevel);
+            });
+        });
     }
 
     private void ConnectNewNodes(List<MapNode> newNodes, List<MapNode> existingNodes)
@@ -210,8 +207,8 @@ public class MapGenerator : MonoBehaviour
 
         foreach (var newNode in newNodes)
         {
-            bool isConnected = false;
-            float searchDistance = MAX_CONNECTION_DISTANCE;
+            var isConnected = false;
+            var searchDistance = MAX_CONNECTION_DISTANCE;
 
             while (!isConnected)
             {
@@ -222,7 +219,7 @@ public class MapGenerator : MonoBehaviour
                     .OrderBy(n => Vector3.Distance(newNode.position, n.position))
                     .FirstOrDefault();
 
-                if (closestExisting != null)
+                if (closestExisting is not null)
                 {
                     newNode.ConnectTo(closestExisting);
                     isConnected = true;
@@ -234,15 +231,16 @@ public class MapGenerator : MonoBehaviour
                 }
 
                 // Si toujours pas connecté, forcer une connexion au plus proche sans vérifier les intersections
-                if (!isConnected)
-                {
-                    var forceConnect = existingNodes
-                        .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                        .First();
-                    newNode.ConnectTo(forceConnect);
-                    isConnected = true;
-                    Debug.Log("Forced connection to prevent isolation");
-                }
+                if (isConnected) continue;
+                
+                var forceConnect = existingNodes
+                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                    .First();
+                
+                newNode.ConnectTo(forceConnect);
+                isConnected = true;
+                Debug.Log("Forced connection to prevent isolation");
+                
             }
 
             // Ajouter des connexions supplémentaires aux autres nouveaux nœuds
@@ -254,57 +252,47 @@ public class MapGenerator : MonoBehaviour
                 .Take(2) // Limiter à 2 connexions supplémentaires
                 .ToList();
 
-            foreach (var other in potentialNewConnections)
-            {
-                if (newNode.connections.Count >= MAX_CONNECTIONS || 
-                    other.connections.Count >= MAX_CONNECTIONS) continue;
-
-                newNode.ConnectTo(other);
-                Debug.Log($"Added additional connection between new nodes");
-            }
+            potentialNewConnections
+                .Where(other => newNode.connections.Count < MAX_CONNECTIONS && other.connections.Count < MAX_CONNECTIONS)
+                .ToList()
+                .ForEach(other =>
+                {
+                    newNode.ConnectTo(other);
+                    Debug.Log($"Added additional connection between new nodes");
+                });
         }
 
         // Vérification finale pour les points isolés
         foreach (var newNode in newNodes)
         {
-            if (newNode.connections.Count == 0)
-            {
-                var closestNode = existingNodes
-                    .Concat(newNodes.Where(n => n != newNode))
-                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                    .First();
-                newNode.ConnectTo(closestNode);
-                Debug.Log("Fixed isolated node with emergency connection");
-            }
+            if (newNode.connections.Count != 0) continue;
+            
+            var closestNode = existingNodes
+                .Concat(newNodes.Where(n => n != newNode))
+                .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                .First();
+            
+            newNode.ConnectTo(closestNode);
+            Debug.Log("Fixed isolated node with emergency connection");
         }
     }
 
     private bool WouldCreateIntersection(Vector3 start, Vector3 end)
     {
-        foreach (var level in levels)
-        {
-            foreach (var node in level.points)
-            {
-                foreach (var connection in node.connections)
-                {
-                    if (LinesIntersect(start, end, node.position, connection.position))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return levels
+            .SelectMany(level => level.points)
+            .SelectMany(node => node.connections, (node, connection) => new { node, connection })
+            .Any(pair => LinesIntersect(start, end, pair.node.position, pair.connection.position));
     }
 
     private bool LinesIntersect(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
     {
-        float denominator = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+        var denominator = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
         
         if (denominator == 0) return false;
         
-        float ua = (((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x))) / denominator;
-        float ub = (((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x))) / denominator;
+        var ua = (((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x))) / denominator;
+        var ub = (((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x))) / denominator;
         
         return ua > 0 && ua < 1 && ub > 0 && ub < 1;
     }

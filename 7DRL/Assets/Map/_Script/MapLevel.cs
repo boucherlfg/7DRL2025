@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class MapLevel
 {
-    public List<MapNode> points = new List<MapNode>();
+    public List<MapNode> points;
     public const float MIN_DISTANCE = 2f;
 
     private float width;
@@ -20,15 +20,15 @@ public class MapLevel
 
     public Vector3[] GeneratePoints()
     {
-        List<Vector3> positions = new List<Vector3>();
-        float halfWidth = width / 2f;
-        float halfHeight = height / 2f;
-        float cellSize = Mathf.Sqrt((width * height) / pointCount);
+        List<Vector3> positions = new();
+        var halfWidth = width / 2f;
+        var halfHeight = height / 2f;
+        var cellSize = Mathf.Sqrt((width * height) / pointCount);
 
         // Génère une grille de positions possibles
-        for (float x = -halfWidth; x < halfWidth; x += cellSize)
+        for (var x = -halfWidth; x < halfWidth; x += cellSize)
         {
-            for (float y = -halfHeight; y < halfHeight; y += cellSize)
+            for (var y = -halfHeight; y < halfHeight; y += cellSize)
             {
                 positions.Add(new Vector3(
                     x + Random.Range(cellSize * 0.2f, cellSize * 0.8f),
@@ -39,12 +39,12 @@ public class MapLevel
         }
 
         // Mélange les positions et prend les n premières
-        System.Random rng = new System.Random();
-        int n = positions.Count;
+        var rng = new System.Random();
+        var n = positions.Count;
         while (n > 1)
         {
             n--;
-            int k = rng.Next(n + 1);
+            var k = rng.Next(n + 1);
             Vector3 temp = positions[k];
             positions[k] = positions[n];
             positions[n] = temp;

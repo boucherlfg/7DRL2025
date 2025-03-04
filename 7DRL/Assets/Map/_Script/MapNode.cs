@@ -1,86 +1,81 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Random = UnityEngine.Random;
 
 public class MapNode : MonoBehaviour
 {
     public int level;
     public Vector3 position;
     public List<MapNode> connections = new List<MapNode>();
+    private SpriteRenderer spriteRenderer;
+    private NodeType nodeType;
+
+    private void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
     public void ConnectTo(MapNode otherNode)
     {
-        if (!connections.Contains(otherNode))
-    {
+        if (connections.Contains(otherNode)) return;
+    
         connections.Add(otherNode);
         otherNode.connections.Add(this);
         CreateVisualConnection(otherNode);
-    }
+
     }
 
     public void SetVisibility(int currentLevel)
     {
-        var spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null)
+        if (spriteRenderer is not null)
         {
             spriteRenderer.enabled = level <= currentLevel;
         }
 
-        if (transform.parent != null)
+        if (transform.parent is null) return;
+        
+        foreach (Transform child in transform.parent)
         {
-            foreach (Transform child in transform.parent)
+            var line = child.GetComponent<LineRenderer>();
+            if (line is null && IsConnectedToLine(line)) continue;
+            
+            // Only show lines connecting nodes of visible levels
+            var start = line.GetPosition(0);
+            var end = line.GetPosition(1);
+            
+            var startNode = GetNodeAtPosition(start);
+            var endNode = GetNodeAtPosition(end);
+            
+            if (startNode is not null && endNode is not null)
             {
-                LineRenderer line = child.GetComponent<LineRenderer>();
-                if (line != null && IsConnectedToLine(line))
-                {
-                    // Only show lines connecting nodes of visible levels
-                    Vector3 start = line.GetPosition(0);
-                    Vector3 end = line.GetPosition(1);
-                    
-                    MapNode startNode = GetNodeAtPosition(start);
-                    MapNode endNode = GetNodeAtPosition(end);
-                    
-                    if (startNode != null && endNode != null)
-                    {
-                        line.enabled = startNode.level <= currentLevel && endNode.level <= currentLevel;
-                    }
-                }
+                line.enabled = startNode.level <= currentLevel && endNode.level <= currentLevel;
             }
         }
     }
 
     private MapNode GetNodeAtPosition(Vector3 position)
-    {
-        if (transform.parent == null) return null;
-        
-        foreach (Transform child in transform.parent)
-        {
-            MapNode node = child.GetComponent<MapNode>();
-            if (node != null && Vector3.Distance(node.transform.position, position) < 0.1f)
-            {
-                return node;
-            }
-        }
-        return null;
-    }
+        => transform.parent?.GetComponentsInChildren<MapNode>()
+            .FirstOrDefault(node => Vector3.Distance(node.transform.position, position) < 0.1f);
 
     private bool IsConnectedToLine(LineRenderer line)
     {
-        Vector3 start = line.GetPosition(0);
-        Vector3 end = line.GetPosition(1);
+        var start = line.GetPosition(0);
+        var end = line.GetPosition(1);
+        
         return Vector3.Distance(start, transform.position) < 0.1f || 
                Vector3.Distance(end, transform.position) < 0.1f;
     }
 
     private void CreateVisualConnection(MapNode otherNode)
     {
-        if (transform.parent == null) return;
+        if (transform.parent is null) return;
         
         var mapGen = transform.parent.GetComponent<MapGenerator>();
-        GameObject lineObj = Instantiate(mapGen.linePrefab, Vector3.zero, Quaternion.identity);
-        LineRenderer line = lineObj.GetComponent<LineRenderer>();
+        var lineObj = Instantiate(mapGen.linePrefab, Vector3.zero, Quaternion.identity);
+        var line = lineObj.GetComponent<LineRenderer>();
         
-        Material lineMaterial = new Material(Shader.Find("Sprites/Default"));
+        var lineMaterial = new Material(Shader.Find("Sprites/Default"));
         line.material = lineMaterial;
         
         // Vérifier d'abord si c'est une connexion de niveau 1
@@ -92,7 +87,7 @@ public class MapNode : MonoBehaviour
         }
         else
         {
-            int connectionLevel = Mathf.Max(level, otherNode.level);
+            var connectionLevel = Mathf.Max(level, otherNode.level);
             lineColor = GetColorForLevel(connectionLevel);
             Debug.Log($"Creating connection level {connectionLevel}");
         }
@@ -123,4 +118,6 @@ public class MapNode : MonoBehaviour
             1f                       // Alpha
         );
     }
+    
+    private NodeType GetNodeType() => nodeType;
 }
