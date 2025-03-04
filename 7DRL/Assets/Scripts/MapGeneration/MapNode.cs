@@ -63,7 +63,8 @@ public class MapNode : MonoBehaviour
         foreach (Transform child in transform.parent)
         {
             var line = child.GetComponent<LineRenderer>();
-            if (line is null && IsConnectedToLine(line)) continue;
+            // Modification de la condition : vérifier si line est null avant d'appeler IsConnectedToLine
+            if (line == null || !IsConnectedToLine(line)) continue;
             
             // Only show lines connecting nodes of visible levels
             var start = line.GetPosition(0);
