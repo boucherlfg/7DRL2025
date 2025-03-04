@@ -259,8 +259,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapGenerator: {fileID: 1065883194}
-  distanceFromExistingPoints: 7
-  minDistanceBetweenPoints: 3
+  distanceFromExistingPoints: 0
+  minDistanceBetweenPoints: 2
 --- !u!114 &1065883194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
   linePrefab: {fileID: 2056785820897540950, guid: c1a78aadc12da65488f8da9e97a637cf, type: 3}
   mapWidth: 20
   mapHeight: 10
-  maxLevels: 2
+  maxLevels: 50
 --- !u!4 &1065883195
 Transform:
   m_ObjectHideFlags: 0

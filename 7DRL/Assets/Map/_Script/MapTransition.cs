@@ -165,19 +165,29 @@ public class MapTransition : MonoBehaviour
     {
         List<MapNode> newNodes = new List<MapNode>();
         
-        // First generate all points
+        // First generate all points with correct level
         for (int i = 0; i < exactPointCount; i++)
         {
             Vector3 newPosition = GetValidPosition(edgeNode.transform.position, newNodes);
             MapNode newNode = mapGenerator.CreatePointNode(newPosition);
-            newNode.level = edgeNode.level + 1;
+            newNode.level = edgeNode.level + 1;  // Set level before any connections
             newNodes.Add(newNode);
-            targetLevel.points.Add(newNode);  // Add to the target level
+            targetLevel.points.Add(newNode);
         }
 
-        // Create minimum spanning tree to ensure connectivity
+        // Connect to edge node first - this should be level 1
+        foreach (var newNode in newNodes)
+        {
+            if (edgeNode.level == 1)
+            {
+                ConnectNewNodeToEdge(edgeNode, newNode);
+            }
+        }
+
+        // Then create connections between new nodes
         List<MapNode> connectedNodes = new List<MapNode> { edgeNode };
         List<MapNode> unconnectedNodes = new List<MapNode>(newNodes);
+
 
         while (unconnectedNodes.Count > 0)
         {
@@ -231,8 +241,8 @@ public class MapTransition : MonoBehaviour
         if (sourceNode.connections.Count < MAX_CONNECTIONS && 
             targetNode.connections.Count < MAX_CONNECTIONS)
         {
+            // Create one-way connection to avoid double connections
             sourceNode.ConnectTo(targetNode);
-            targetNode.ConnectTo(sourceNode);
         }
     }
 }

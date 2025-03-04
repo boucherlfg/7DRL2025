@@ -11,7 +11,7 @@ public class MapGenerator : MonoBehaviour
 
     private int currentLevel = 1;
     private List<MapLevel> levels = new List<MapLevel>();
-    private const float SIZE_INCREASE_PER_LEVEL = 10f;
+    private const float SIZE_INCREASE_PER_LEVEL = 20f;
 
 
     void Start()
@@ -52,11 +52,10 @@ public class MapGenerator : MonoBehaviour
         // Create center node with no initial connections
         Vector3 centerPosition = Vector3.zero;
         MapNode centerNode = CreatePointNode(centerPosition);
-        centerNode.level = currentLevel;
-        centerNode.connections.Clear(); // Ensure no connections
+        centerNode.level = 1;  // Forcer explicitement le niveau 1
         initialLevel.points.Add(centerNode);
 
-        Debug.Log($"Initial node created with {centerNode.connections.Count} connections");
+        Debug.Log($"Initial node created with level {centerNode.level}");
         
         var mapTransition = GetComponent<MapTransition>();
         mapTransition.SetCurrentMapSize(initialWidth, initialHeight);
@@ -68,10 +67,10 @@ public class MapGenerator : MonoBehaviour
         GameObject pointObj = Instantiate(pointPrefab, position, Quaternion.identity);
         MapNode node = pointObj.GetComponent<MapNode>();
         node.position = position;
-        node.level = currentLevel;  // Changed from currentLevel + 1
         node.transform.parent = transform;
-        node.connections = new List<MapNode>();  // Initialize empty connections list
-        Debug.Log($"Created new node at level {node.level} with {node.connections.Count} connections");
+        node.connections = new List<MapNode>();
+        node.level = 0;  // Initialiser à 0 pour détecter les problèmes de niveau non défini
+        Debug.Log($"Creating new node with initial level 0");
         return node;
     }
 
@@ -206,43 +205,43 @@ public class MapGenerator : MonoBehaviour
     private void ConnectNewNodes(List<MapNode> newNodes, List<MapNode> existingNodes)
     {
         const int MAX_CONNECTIONS = 3;
-        const float MAX_CONNECTION_DISTANCE = 8f; // Augmenté pour permettre plus de connexions
-        const int MIN_CONNECTIONS_TO_EXISTING = 1;
+        const float MAX_CONNECTION_DISTANCE = 8f;
+        const float FALLBACK_DISTANCE = 12f; // Distance plus grande pour les points isolés
 
         foreach (var newNode in newNodes)
         {
-            Debug.Log($"Finding connections for new node at position {newNode.position}");
-            
-            // Trouver le nœud existant le plus proche et forcer une connexion
-            var closestExisting = existingNodes
-                .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                .FirstOrDefault();
+            bool isConnected = false;
+            float searchDistance = MAX_CONNECTION_DISTANCE;
 
-            if (closestExisting != null)
+            while (!isConnected)
             {
-                float distToClosest = Vector3.Distance(newNode.position, closestExisting.position);
-                Debug.Log($"Closest existing node distance: {distToClosest}");
-                
-                // Forcer au moins une connexion avec le graphe existant
-                if (!WouldCreateIntersection(newNode.position, closestExisting.position))
+                // Chercher connexion avec le graphe existant
+                var closestExisting = existingNodes
+                    .Where(n => Vector3.Distance(newNode.position, n.position) < searchDistance)
+                    .Where(n => !WouldCreateIntersection(newNode.position, n.position))
+                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                    .FirstOrDefault();
+
+                if (closestExisting != null)
                 {
                     newNode.ConnectTo(closestExisting);
-                    Debug.Log($"Connected to closest existing node at {closestExisting.position}");
+                    isConnected = true;
+                    Debug.Log($"Connected node to existing graph at distance {Vector3.Distance(newNode.position, closestExisting.position)}");
                 }
                 else
                 {
-                    Debug.Log("Connection to closest would create intersection, trying others");
-                    // Essayer de trouver une autre connexion possible
-                    var alternativeConnection = existingNodes
-                        .Where(n => !WouldCreateIntersection(newNode.position, n.position))
-                        .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                        .FirstOrDefault();
+                    searchDistance = FALLBACK_DISTANCE; // Augmenter la distance si pas de connexion trouvée
+                }
 
-                    if (alternativeConnection != null)
-                    {
-                        newNode.ConnectTo(alternativeConnection);
-                        Debug.Log($"Connected to alternative existing node at {alternativeConnection.position}");
-                    }
+                // Si toujours pas connecté, forcer une connexion au plus proche sans vérifier les intersections
+                if (!isConnected)
+                {
+                    var forceConnect = existingNodes
+                        .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                        .First();
+                    newNode.ConnectTo(forceConnect);
+                    isConnected = true;
+                    Debug.Log("Forced connection to prevent isolation");
                 }
             }
 
@@ -252,6 +251,7 @@ public class MapGenerator : MonoBehaviour
                 .Where(n => Vector3.Distance(newNode.position, n.position) < MAX_CONNECTION_DISTANCE)
                 .Where(n => !WouldCreateIntersection(newNode.position, n.position))
                 .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                .Take(2) // Limiter à 2 connexions supplémentaires
                 .ToList();
 
             foreach (var other in potentialNewConnections)
@@ -260,10 +260,22 @@ public class MapGenerator : MonoBehaviour
                     other.connections.Count >= MAX_CONNECTIONS) continue;
 
                 newNode.ConnectTo(other);
-                Debug.Log($"Added connection to new node at {other.position}");
+                Debug.Log($"Added additional connection between new nodes");
             }
+        }
 
-            Debug.Log($"Final connection count for node: {newNode.connections.Count}");
+        // Vérification finale pour les points isolés
+        foreach (var newNode in newNodes)
+        {
+            if (newNode.connections.Count == 0)
+            {
+                var closestNode = existingNodes
+                    .Concat(newNodes.Where(n => n != newNode))
+                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
+                    .First();
+                newNode.ConnectTo(closestNode);
+                Debug.Log("Fixed isolated node with emergency connection");
+            }
         }
     }
 
