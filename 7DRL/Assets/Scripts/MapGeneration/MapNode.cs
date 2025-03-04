@@ -14,7 +14,33 @@ public class MapNode : MonoBehaviour
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        AssignRandomNodeType();
+        UpdateNodeColor();
     }
+
+    private void AssignRandomNodeType()
+    {
+        nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
+    }
+
+    private void UpdateNodeColor()
+    {
+        if (spriteRenderer == null) return;
+        spriteRenderer.color = GetColorForNodeType(nodeType);
+    }
+
+    private Color GetColorForNodeType(NodeType type)
+    {
+        return type switch
+        {
+            NodeType.Ruins => new Color(0.7f, 0.0f, 0.0f, 1f),    // Rouge foncé
+            NodeType.City => new Color(0.0f, 0.0f, 0.7f, 1f),     // Bleu foncé
+            NodeType.Farm => new Color(0.0f, 0.7f, 0.0f, 1f),     // Vert foncé
+            NodeType.Dungeon => new Color(0.5f, 0.0f, 0.5f, 1f),  // Violet
+            _ => Color.black
+        };
+    }
+
 
     public void ConnectTo(MapNode otherNode)
     {
@@ -77,19 +103,18 @@ public class MapNode : MonoBehaviour
         var lineMaterial = new Material(Shader.Find("Sprites/Default"));
         line.material = lineMaterial;
         
-        // Vérifier d'abord si c'est une connexion de niveau 1
-        Color lineColor;
-        if (level == 1 && otherNode.level == 1)
+        // Définir les 3 couleurs de route
+        Color greyRoad = new Color(0.5f, 0.5f, 0.5f, 1f);    // Gris
+        Color brownRoad = new Color(0.6f, 0.4f, 0.2f, 1f);   // Marron
+        Color whiteRoad = Color.white;                        // Blanc
+
+        // Choisir aléatoirement une des trois couleurs
+        Color lineColor = Random.Range(0, 3) switch
         {
-            lineColor = Color.white;
-            Debug.Log("Creating level 1 connection (white)");
-        }
-        else
-        {
-            var connectionLevel = Mathf.Max(level, otherNode.level);
-            lineColor = GetColorForLevel(connectionLevel);
-            Debug.Log($"Creating connection level {connectionLevel}");
-        }
+            0 => greyRoad,
+            1 => brownRoad,
+            _ => whiteRoad
+        };
         
         line.startColor = lineColor;
         line.endColor = lineColor;
@@ -102,21 +127,21 @@ public class MapNode : MonoBehaviour
         lineObj.transform.parent = transform.parent;
     }
 
-    private Color GetColorForLevel(int level)
-    {
-        // Niveau 1 reste toujours blanc
-        if (level == 1) return Color.white;
+    // private Color GetColorForLevel(int level)
+    // {
+    //     // Niveau 1 reste toujours blanc
+    //     if (level == 1) return Color.white;
         
-        // Utiliser le niveau comme seed pour avoir une couleur consistante par niveau
-        Random.InitState(level);
+    //     // Utiliser le niveau comme seed pour avoir une couleur consistante par niveau
+    //     Random.InitState(level);
         
-        return new Color(
-            Random.Range(0.2f, 1f),  // Red - minimum 0.2 pour éviter les couleurs trop sombres
-            Random.Range(0.2f, 1f),  // Green
-            Random.Range(0.2f, 1f),  // Blue
-            1f                       // Alpha
-        );
-    }
+    //     return new Color(
+    //         Random.Range(0.2f, 1f),  // Red - minimum 0.2 pour éviter les couleurs trop sombres
+    //         Random.Range(0.2f, 1f),  // Green
+    //         Random.Range(0.2f, 1f),  // Blue
+    //         1f                       // Alpha
+    //     );
+    // }
     
     private NodeType GetNodeType() => nodeType;
 }

@@ -8,7 +8,7 @@ public class MapTransition : MonoBehaviour
     public float distanceFromExistingPoints;
     public float minDistanceBetweenPoints;
     private const int POINTS_PER_LEVEL = 10;
-    private const int MAX_CONNECTIONS = 5;
+    private const int MAX_CONNECTIONS = 4;
 
     private float currentWidth;
     private float currentHeight;

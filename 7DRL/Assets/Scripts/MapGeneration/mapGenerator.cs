@@ -11,7 +11,7 @@ public class MapGenerator : MonoBehaviour
 
     private int currentLevel = 1;
     private List<MapLevel> levels = new List<MapLevel>();
-    private const float SIZE_INCREASE_PER_LEVEL = 20f;
+    public const float SIZE_INCREASE_PER_LEVEL = 10f;
     
     private void Start()
     {
@@ -23,10 +23,18 @@ public class MapGenerator : MonoBehaviour
     {
         var pointObj = Instantiate(pointPrefab, position, Quaternion.identity);
         var node = pointObj.GetComponent<MapNode>();
+        var spriteRenderer = pointObj.GetComponent<SpriteRenderer>();
+        
+        // Mettre le point au-dessus des routes
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.sortingOrder = 1;
+        }
+        
         node.position = position;
         node.transform.parent = transform;
         node.connections = new List<MapNode>();
-        node.level = 0;  // Initialiser à 0 pour détecter les problèmes de niveau non défini
+        node.level = 0;
         Debug.Log($"Creating new node with initial level 0");
         
         return node;
@@ -201,7 +209,7 @@ public class MapGenerator : MonoBehaviour
 
     private void ConnectNewNodes(List<MapNode> newNodes, List<MapNode> existingNodes)
     {
-        const int MAX_CONNECTIONS = 3;
+        const int MAX_CONNECTIONS = 4;
         const float MAX_CONNECTION_DISTANCE = 8f;
         const float FALLBACK_DISTANCE = 12f; // Distance plus grande pour les points isolés
 
