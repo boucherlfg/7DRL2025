@@ -23,7 +23,6 @@ public class MapNode : MonoBehaviour
         connections.Add(otherNode);
         otherNode.connections.Add(this);
         CreateVisualConnection(otherNode);
-
     }
 
     public void SetVisibility(int currentLevel)
