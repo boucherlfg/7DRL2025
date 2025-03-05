@@ -363,7 +363,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb388e105585bb44fbdd218083ee2688, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointPrefab: {fileID: 8429997267589103995, guid: 6f485619e2e073f45b39d19b9ac3297c, type: 3}
+  nodePrefab: {fileID: 2027537553158762255, guid: 2e69fe3ccce64324daca7a460cd341dc, type: 3}
+  ruinsSprite: {fileID: 584374925798354339, guid: 140f037160f53e34eb978f9672d3c70c, type: 3}
+  citySprite: {fileID: 8357441575128055077, guid: aeac8b186b5d60e49ab309589e17fcf8, type: 3}
+  farmSprite: {fileID: -2680004415806329950, guid: 1a8bdea2b18928846abce3f7cae4e91b, type: 3}
+  dungeonSprite: {fileID: 1921053324792869636, guid: f175b84717506444f9ae789020c77fb4, type: 3}
   linePrefab: {fileID: 2056785820897540950, guid: c1a78aadc12da65488f8da9e97a637cf, type: 3}
   mapWidth: 20
   mapHeight: 10
