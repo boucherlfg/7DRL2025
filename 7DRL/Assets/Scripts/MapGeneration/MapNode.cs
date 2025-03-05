@@ -9,11 +9,13 @@ public class MapNode : MonoBehaviour
     public Vector3 position;
     public List<MapNode> connections = new List<MapNode>();
     private SpriteRenderer spriteRenderer;
+    private Vector3 originalScale;
     private NodeType nodeType;
 
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        originalScale = transform.localScale;
         
         // Forcer l'utilisation du shader Sprites/Default
         if (spriteRenderer != null && spriteRenderer.material.shader.name != "Sprites/Default")
@@ -291,6 +293,21 @@ public class MapNode : MonoBehaviour
         {
             GameManager.Instance.AddMapLink(this, otherNode);
         }
+    }
+    
+    private void OnMouseOver()
+    {
+        transform.localScale = originalScale * 1.2f; // Increase size by 20%
+    }
+
+    private void OnMouseExit()
+    {
+        transform.localScale = originalScale; // Reset to original size
+    }
+
+    private void OnMouseDown()
+    {
+        Debug.Log($"MapNode of type {nodeType} clicked!");
     }
 
     private NodeType GetNodeType() => nodeType;

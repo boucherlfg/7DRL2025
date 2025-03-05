@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      parchmentCrinkled_0: 5188436870731397820
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
