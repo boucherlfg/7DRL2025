@@ -16,11 +16,28 @@ public class MapNode : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         AssignRandomNodeType();
         UpdateNodeColor();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddMapNode(this);
+        }
+        else
+        {
+            Debug.LogError("GameManager instance is null.");
+        }
     }
 
     private void AssignRandomNodeType()
     {
         nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.UpdateMapNode(this);
+        }
+        else
+        {
+            Debug.LogError("GameManager instance is null.");
+        }
     }
 
     private void UpdateNodeColor()
@@ -41,39 +58,45 @@ public class MapNode : MonoBehaviour
         };
     }
 
-
     public void ConnectTo(MapNode otherNode)
     {
         if (connections.Contains(otherNode)) return;
-    
+
         connections.Add(otherNode);
         otherNode.connections.Add(this);
         CreateVisualConnection(otherNode);
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddMapLink(this, otherNode);
+        }
+        else
+        {
+            Debug.LogError("GameManager instance is null.");
+        }
     }
 
     public void SetVisibility(int currentLevel)
     {
-        if (spriteRenderer is not null)
+        if (spriteRenderer != null)
         {
             spriteRenderer.enabled = level <= currentLevel;
         }
 
-        if (transform.parent is null) return;
-        
+        if (transform.parent == null) return;
+
         foreach (Transform child in transform.parent)
         {
             var line = child.GetComponent<LineRenderer>();
-            // Modification de la condition : vérifier si line est null avant d'appeler IsConnectedToLine
             if (line == null || !IsConnectedToLine(line)) continue;
-            
-            // Only show lines connecting nodes of visible levels
+
             var start = line.GetPosition(0);
             var end = line.GetPosition(1);
-            
+
             var startNode = GetNodeAtPosition(start);
             var endNode = GetNodeAtPosition(end);
-            
-            if (startNode is not null && endNode is not null)
+
+            if (startNode != null && endNode != null)
             {
                 line.enabled = startNode.level <= currentLevel && endNode.level <= currentLevel;
             }
@@ -88,61 +111,52 @@ public class MapNode : MonoBehaviour
     {
         var start = line.GetPosition(0);
         var end = line.GetPosition(1);
-        
+
         return Vector3.Distance(start, transform.position) < 0.1f || 
                Vector3.Distance(end, transform.position) < 0.1f;
     }
 
     private void CreateVisualConnection(MapNode otherNode)
     {
-        if (transform.parent is null) return;
-        
+        if (transform.parent == null) return;
+
         var mapGen = transform.parent.GetComponent<MapGenerator>();
         var lineObj = Instantiate(mapGen.linePrefab, Vector3.zero, Quaternion.identity);
         var line = lineObj.GetComponent<LineRenderer>();
-        
+
         var lineMaterial = new Material(Shader.Find("Sprites/Default"));
         line.material = lineMaterial;
-        
-        // Définir les 3 couleurs de route
+
         Color greyRoad = new Color(0.5f, 0.5f, 0.5f, 1f);    // Gris
         Color brownRoad = new Color(0.6f, 0.4f, 0.2f, 1f);   // Marron
         Color whiteRoad = Color.white;                        // Blanc
 
-        // Choisir aléatoirement une des trois couleurs
         Color lineColor = Random.Range(0, 3) switch
         {
             0 => greyRoad,
             1 => brownRoad,
             _ => whiteRoad
         };
-        
+
         line.startColor = lineColor;
         line.endColor = lineColor;
-        
+
         line.startWidth = 0.1f;
         line.endWidth = 0.1f;
-        
+
         line.SetPosition(0, transform.position);
         line.SetPosition(1, otherNode.transform.position);
         lineObj.transform.parent = transform.parent;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddMapLink(this, otherNode);
+        }
+        else
+        {
+            Debug.LogError("GameManager instance is null.");
+        }
     }
 
-    // private Color GetColorForLevel(int level)
-    // {
-    //     // Niveau 1 reste toujours blanc
-    //     if (level == 1) return Color.white;
-        
-    //     // Utiliser le niveau comme seed pour avoir une couleur consistante par niveau
-    //     Random.InitState(level);
-        
-    //     return new Color(
-    //         Random.Range(0.2f, 1f),  // Red - minimum 0.2 pour éviter les couleurs trop sombres
-    //         Random.Range(0.2f, 1f),  // Green
-    //         Random.Range(0.2f, 1f),  // Blue
-    //         1f                       // Alpha
-    //     );
-    // }
-    
     private NodeType GetNodeType() => nodeType;
 }
