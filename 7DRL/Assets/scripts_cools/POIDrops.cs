@@ -6,7 +6,7 @@ public class POIDrops : MonoBehaviour
 {
 public GameObject itemPrefab;
 public GameObject parent;
-public Item[] dropsPossibles;
+public List<Item> dropsPossibles = new();
 public void Start(){
     
 }
@@ -15,7 +15,7 @@ public void addItem(){
   
 
 
-  int randomChiffre = Random.Range(0, dropsPossibles.Length);
+  int randomChiffre = Random.Range(0, dropsPossibles.Count);
   GestionRessourcesConcreteSingleton.Instance.listSac.Add(dropsPossibles[randomChiffre]);
  Debug.Log(GestionRessourcesConcreteSingleton.Instance.listSac.Count);
 

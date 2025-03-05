@@ -13,6 +13,7 @@ public class Item : ScriptableObject
     public enum ItemType{Arme, Armure, Potion, Nourriture, Minerai, Plante, Luxe};
    // public  List<ItemType> typesItems = new List<ItemType>();
 public int valeur;
+public int tier;
   /*  public int valeurArme;
     public int valeurArmure;
     public int valeurPotion;
