@@ -4,7 +4,13 @@ using System.Linq;
 
 public class MapGenerator : MonoBehaviour
 {
-    public GameObject pointPrefab;
+    [Header("Node Prefabs")]
+    public GameObject nodePrefab;  // Prefab de base avec SpriteRenderer
+    public Sprite ruinsSprite;     // Sprite pour les ruines
+    public Sprite citySprite;      // Sprite pour les villes
+    public Sprite farmSprite;      // Sprite pour les fermes
+    public Sprite dungeonSprite;   // Sprite pour les donjons
+
     public GameObject linePrefab;
     public float mapWidth;
     public float mapHeight;
@@ -22,7 +28,7 @@ public class MapGenerator : MonoBehaviour
 
     private bool ValidateComponents()
     {
-        if (pointPrefab == null || linePrefab == null)
+        if (nodePrefab == null || linePrefab == null)
         {
             Debug.LogError("Missing prefabs!");
             return false;
@@ -61,8 +67,6 @@ public class MapGenerator : MonoBehaviour
             Debug.LogError("GameManager instance is null.");
         }
 
-        Debug.Log($"Initial node created with level {centerNode.level}");
-
         var mapTransition = GetComponent<MapTransition>();
         mapTransition.SetCurrentMapSize(initialWidth, initialHeight);
         mapTransition.TransitionToNewLevel(new List<MapNode> { centerNode });
@@ -70,11 +74,10 @@ public class MapGenerator : MonoBehaviour
 
     public MapNode CreatePointNode(Vector3 position)
     {
-        var pointObj = Instantiate(pointPrefab, position, Quaternion.identity);
+        var pointObj = Instantiate(nodePrefab, position, Quaternion.identity);
         var node = pointObj.GetComponent<MapNode>();
         var spriteRenderer = pointObj.GetComponent<SpriteRenderer>();
 
-        // Mettre le point au-dessus des routes
         if (spriteRenderer != null)
         {
             spriteRenderer.sortingOrder = 1;
@@ -84,7 +87,6 @@ public class MapGenerator : MonoBehaviour
         node.transform.parent = transform;
         node.connections = new List<MapNode>();
         node.level = 0;
-        Debug.Log($"Creating new node with initial level 0");
 
         return node;
     }
