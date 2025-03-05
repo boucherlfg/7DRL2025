@@ -5,6 +5,7 @@ using System;
 
 public class Item : ScriptableObject
 {
+
     public int id;
     
     public string itemName;
