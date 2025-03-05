@@ -2,7 +2,7 @@ using NUnit.Framework;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-public class NewMonoBehaviourScript : MonoBehaviour
+public class POIDrops : MonoBehaviour
 {
 public GameObject itemPrefab;
 public GameObject parent;
@@ -11,60 +11,51 @@ public void Start(){
     
 }
 
-public void addArme(){ 
+public void addItem(){ 
   
- int randomChiffre = Random.Range(0, dropsPossibles.Length);
- GestionRessourcesConcreteSingleton.Instance.listSac.Add(dropsPossibles[randomChiffre]);
-       GameObject itemInstance = Instantiate(itemPrefab,parent.transform );
-       itemInstance.GetComponent<AfficherMagasin>().item = dropsPossibles[randomChiffre];
-       itemInstance.GetComponent<AfficherMagasin>().changeImage();
 
- foreach(Item affaire in GestionRessourcesConcreteSingleton.Instance.listSac){
-    Debug.Log(affaire);
- }
-for (int i = 0; i < dropsPossibles[randomChiffre].typesItems.Count; i++){
-    switch(dropsPossibles[randomChiffre].typesItems[i].ToString()) 
-{
-  case "Arme":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesArme += dropsPossibles[randomChiffre].valeurArme;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurArme;
 
+  int randomChiffre = Random.Range(0, dropsPossibles.Length);
+  GestionRessourcesConcreteSingleton.Instance.listSac.Add(dropsPossibles[randomChiffre]);
+ Debug.Log(GestionRessourcesConcreteSingleton.Instance.listSac.Count);
+
+//  GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeur;
+
+ /* switch(dropsPossibles[randomChiffre].itemType.ToString()) 
+  {
+    case "Arme":
+
+     GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesArme += dropsPossibles[randomChiffre].valeurArme;
+     GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurArme; 
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesArme += dropsPossibles[randomChiffre].valeur;
     break;
-  case "Armure":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesArmure += dropsPossibles[randomChiffre].valeurArmure;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurArmure;
 
+    case "Armure":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesArmure += dropsPossibles[randomChiffre].valeur;
     break;
-  case "Potion":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesPotion += dropsPossibles[randomChiffre].valeurPotion;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurPotion;
 
+    case "Potion":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesPotion += dropsPossibles[randomChiffre].valeur;
     break;
-  case "Nourriture":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesNourriture += dropsPossibles[randomChiffre].valeurNourriture;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurNourriture;
 
+    case "Nourriture":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesNourriture += dropsPossibles[randomChiffre].valeur;
     break;
-  case "Minerai":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesMinerai += dropsPossibles[randomChiffre].valeurMinerai;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurMinerai;
 
+    case "Minerai":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesMinerai += dropsPossibles[randomChiffre].valeur;
     break;
-  case "Luxe":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesLuxe += dropsPossibles[randomChiffre].valeurLuxe;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurLuxe;
 
+    case "Luxe":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesLuxe += dropsPossibles[randomChiffre].valeur;
     break;
-      case "Plante":
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesPlante += dropsPossibles[randomChiffre].valeurPlante;
-GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeurPlante;
 
+    case "Plante":
+      GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesPlante += dropsPossibles[randomChiffre].valeur;
     break;
-}
+  }*/
 }
 
-
-}
 
 
 }
