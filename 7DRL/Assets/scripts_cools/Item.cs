@@ -5,6 +5,7 @@ using System;
 
 public class Item : ScriptableObject
 {
+    public int id;
     public string itemName;
     public ItemType itemType;
     public enum ItemType{Arme, Armure, Potion, Nourriture, Minerai, Plante, Luxe};
