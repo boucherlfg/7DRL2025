@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     public List<MapNode> MapNodes { get; private set; }
     public List<(MapNode, MapNode)> MapLinks { get; private set; }
     public PlayerInfo Player { get; private set; }
+    public GameObject playerPrefab;
+    private PlayerController playerInstance;
+
 
     private void Awake()
     {
@@ -24,11 +27,39 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void InitializeGameManager()
+    public void SpawnPlayer(MapNode startNode)
+    {
+        if (startNode == null)
+        {
+            Debug.LogError("Cannot spawn player: start node is null!");
+            return;
+        }
+
+        if (playerInstance == null && playerPrefab != null)
+        {
+            // Instantiate exactly at the node's transform position
+            Vector3 spawnPosition = startNode.transform.position;
+            GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+            playerInstance = playerObj.GetComponent<PlayerController>();
+            
+            if (playerInstance == null)
+            {
+                return;
+            }
+
+            // Make sure the player stays at the exact node position
+            playerInstance.transform.position = spawnPosition;
+            playerInstance.InitializePosition(startNode);
+            SetPlayerPosition(startNode);
+        }
+    }
+
+    public void InitializeGameManager()
     {
         MapNodes = new List<MapNode>();
         MapLinks = new List<(MapNode, MapNode)>();
         Player = new PlayerInfo();
+        playerInstance = null;  // Reset player instance reference
     }
 
     public void AddMapNode(MapNode node)

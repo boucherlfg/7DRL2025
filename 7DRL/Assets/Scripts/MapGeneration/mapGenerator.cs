@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -22,27 +23,27 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
-        if (!ValidateComponents()) return;
+        if (!ValidateComponents())
+        {
+            Debug.LogError("Missing required components on MapGenerator!");
+            enabled = false;
+        }
         InitializeMap();
     }
-
     private bool ValidateComponents()
     {
         if (nodePrefab == null || linePrefab == null)
         {
-            Debug.LogError("Missing prefabs!");
             return false;
         }
 
         if (GetComponent<MapTransition>() == null)
         {
-            Debug.LogError("MapTransition component is required!");
             return false;
         }
 
         return true;
     }
-
     private void InitializeMap()
     {
         currentLevel = 1;
@@ -54,40 +55,68 @@ public class MapGenerator : MonoBehaviour
         // Create center node with no initial connections
         var centerPosition = Vector3.zero;
         var centerNode = CreatePointNode(centerPosition);
-        centerNode.level = 1;  // Forcer explicitement le niveau 1
+        centerNode.level = 1;
         initialLevel.points.Add(centerNode);
 
+        // Spawn player on center node
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddMapNode(centerNode);
-            GameManager.Instance.SetPlayerPosition(centerNode);
+            GameManager.Instance.SpawnPlayer(centerNode);
+            Debug.Log($"Player spawned at center: {centerNode.transform.position}");
         }
-        else
+
+        // Generate additional nodes for the first level (like before)
+        var allNodes = new List<MapNode> { centerNode };
+        var newNodes = new List<MapNode>();
+
+        // Generate 10 new points with optimal positions
+        for (var i = 0; i < 10; i++)
         {
-            Debug.LogError("GameManager instance is null.");
+            var newPosition = FindOptimalPosition(allNodes, initialWidth, initialHeight);
+            var newNode = CreatePointNode(newPosition);
+            newNode.level = 1;
+            newNodes.Add(newNode);
+            allNodes.Add(newNode);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddMapNode(newNode);
+            }
         }
+
+        // Connect the new nodes
+        ConnectNewNodes(newNodes, new List<MapNode> { centerNode });
+
+        // Add to level after connections are made
+        initialLevel.points.AddRange(newNodes);
 
         var mapTransition = GetComponent<MapTransition>();
         mapTransition.SetCurrentMapSize(initialWidth, initialHeight);
-        mapTransition.TransitionToNewLevel(new List<MapNode> { centerNode });
     }
 
     public MapNode CreatePointNode(Vector3 position)
     {
-        var pointObj = Instantiate(nodePrefab, position, Quaternion.identity);
+        // Create the node at the exact position
+        var pointObj = Instantiate(nodePrefab, position, Quaternion.identity, transform);
         var node = pointObj.GetComponent<MapNode>();
+        
+        // Ensure sprite renderer is set up correctly
         var spriteRenderer = pointObj.GetComponent<SpriteRenderer>();
-
         if (spriteRenderer != null)
         {
             spriteRenderer.sortingOrder = 1;
         }
 
+        // Make sure both the node's stored position and transform position match
         node.position = position;
-        node.transform.parent = transform;
+        node.transform.position = position;
+        
+        pointObj.name = $"Node_{position}";
         node.connections = new List<MapNode>();
         node.level = 0;
 
+        Debug.Log($"Created node at position: {position}, Transform position: {node.transform.position}");
         return node;
     }
 
@@ -175,10 +204,6 @@ public class MapGenerator : MonoBehaviour
                     {
                         GameManager.Instance.AddMapNode(newNode);
                     }
-                    else
-                    {
-                        Debug.LogError("GameManager instance is null.");
-                    }
                 }
 
                 // Connect the new nodes
@@ -194,14 +219,24 @@ public class MapGenerator : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Debug.Log($"R pressed - Current Level: {currentLevel}, Max Levels: {maxLevels}");
             ResetMap();
         }
     }
 
-    private void ResetMap()
+   private void ResetMap()
     {
-        // Destroy all child objects
+        // First clean up the player if it exists
+        if (GameManager.Instance != null)
+        {
+            var playerController = FindFirstObjectByType<PlayerController>();
+            if (playerController != null)
+            {
+                DestroyImmediate(playerController.gameObject);
+            }
+            GameManager.Instance.InitializeGameManager();
+        }
+
+        // Then clean up map nodes
         while (transform.childCount > 0)
         {
             DestroyImmediate(transform.GetChild(0).gameObject);
@@ -210,7 +245,6 @@ public class MapGenerator : MonoBehaviour
         levels.Clear();
         InitializeMap();
     }
-
     private void UpdateVisibility()
     {
         levels?.ForEach(level =>
@@ -246,7 +280,6 @@ public class MapGenerator : MonoBehaviour
                 {
                     newNode.ConnectTo(closestExisting);
                     isConnected = true;
-                    Debug.Log($"Connected node to existing graph at distance {Vector3.Distance(newNode.position, closestExisting.position)}");
                 }
                 else
                 {
@@ -262,7 +295,6 @@ public class MapGenerator : MonoBehaviour
 
                 newNode.ConnectTo(forceConnect);
                 isConnected = true;
-                Debug.Log("Forced connection to prevent isolation");
 
             }
 
@@ -281,7 +313,6 @@ public class MapGenerator : MonoBehaviour
                 .ForEach(other =>
                 {
                     newNode.ConnectTo(other);
-                    Debug.Log($"Added additional connection between new nodes");
                 });
         }
 
@@ -296,7 +327,6 @@ public class MapGenerator : MonoBehaviour
                 .First();
 
             newNode.ConnectTo(closestNode);
-            Debug.Log("Fixed isolated node with emergency connection");
         }
     }
 

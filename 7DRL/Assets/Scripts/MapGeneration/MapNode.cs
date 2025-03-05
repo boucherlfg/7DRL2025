@@ -69,14 +69,14 @@ public class MapNode : MonoBehaviour
         var mapGen = GetComponentInParent<MapGenerator>();
         if (mapGen == null) return;
 
-        // Définit le sprite et la couleur avec une intensité plus forte
+        // Add default case with _ pattern
         (Sprite sprite, Color color) = nodeType switch
         {
             NodeType.Ruins => (mapGen.ruinsSprite, new Color(1f, 0.2f, 0.2f, 1f)),    // Rouge plus vif
             NodeType.City => (mapGen.citySprite, new Color(0.2f, 0.2f, 1f, 1f)),      // Bleu plus vif
             NodeType.Farm => (mapGen.farmSprite, new Color(0.2f, 1f, 0.2f, 1f)),      // Vert plus vif
             NodeType.Dungeon => (mapGen.dungeonSprite, new Color(0.8f, 0.2f, 0.8f, 1f)), // Violet plus vif
-            _ => (mapGen.ruinsSprite, Color.white)
+            _ => (mapGen.ruinsSprite, Color.white)  // Default case handles all remaining values
         };
 
         spriteRenderer.sprite = sprite;
@@ -273,7 +273,7 @@ public class MapNode : MonoBehaviour
         {
             0 => new Color(0.6f, 0.4f, 0.2f, 1f), // Marron
             1 => new Color(0.5f, 0.5f, 0.5f, 1f), // Gris
-            2 => new Color(0.3f, 0.3f, 0.3f, 1f)  // Gris foncé
+            _ => new Color(0.3f, 0.3f, 0.3f, 1f)  // Gris foncé
         };
 
         // Appliquer la couleur uniformément
@@ -308,7 +308,19 @@ public class MapNode : MonoBehaviour
     private void OnMouseDown()
     {
         Debug.Log($"MapNode of type {nodeType} clicked!");
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player != null)
+        {
+            player.MoveToNode(this);
+            Debug.Log($"Attempting to move to node of type {nodeType}");
+        }
+        else
+        {
+            Debug.LogError("PlayerController not found in scene!");
+        }
     }
+
+    
 
     private NodeType GetNodeType() => nodeType;
 }
