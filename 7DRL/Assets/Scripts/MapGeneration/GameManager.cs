@@ -4,6 +4,10 @@ using System;
 
 public class GameManager : MonoBehaviour
 {
+    public Sprite ruinsSprite;
+    public Sprite citySprite;
+    public Sprite farmSprite;
+    public Sprite dungeonSprite;
     public static GameManager Instance { get; private set; }
 
     public List<MapNode> MapNodes { get; private set; }
@@ -13,9 +17,9 @@ public class GameManager : MonoBehaviour
     private PlayerController playerInstance;
     private readonly (Color color, int points)[] roadTypes = new[]
     {
-        (new Color(0.5f, 0.5f, 0.5f, 1f), 1),  // Route en pierre (gris) = 1 point
-        (new Color(0.15f, 0.15f, 0.15f, 1f), 2),  // Route en asphalte (noir) = 2 points
-        (new Color(0.6f, 0.4f, 0.2f, 1f), 3)   // Route en bois (marron) = 3 points
+        (new Color(0.6f, 0.4f, 0.2f, 1f), 3),  // Route de terre (marron) = 3 points
+        (new Color(0.5f, 0.5f, 0.5f, 1f), 2),  // Route pavée (gris) = 2 points
+        (new Color(0.15f, 0.15f, 0.15f, 1f), 1) // Grande route (noir) = 1 point
     };
 
 
@@ -29,7 +33,7 @@ public class GameManager : MonoBehaviour
         
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        InitializeGameManager(); // S'assurer que Player est initialisé au démarrage
+        InitializeGameManager();
     }
 
     public void SpawnPlayer(MapNode startNode)
@@ -175,41 +179,118 @@ public class GameManager : MonoBehaviour
 
     private void OnGUI()
     {
-        if (Player == null)
-        {
-            return;
-        }
+        if (Player == null) return;
 
-        // Créer une texture blanche pour le fond
+        // Créer une texture pour le fond
         Texture2D backgroundTexture = new Texture2D(1, 1);
-        backgroundTexture.SetPixel(0, 0, new Color(0, 0, 0, 0.7f));
+        backgroundTexture.SetPixel(0, 0, new Color(0, 0, 0, 0f));
         backgroundTexture.Apply();
 
-        // Style pour le Jour
-        GUIStyle JourStyle = new GUIStyle(GUI.skin.label)
+        // Style pour le texte
+        GUIStyle textStyle = new GUIStyle(GUI.skin.label)
         {
-            fontSize = 32,
-            fontStyle = FontStyle.Bold,
+            fontSize = 16, // Réduction de la taille de police
+            fontStyle = FontStyle.Normal,
             alignment = TextAnchor.MiddleLeft,
-            padding = new RectOffset(10, 10, 5, 5)
+            padding = new RectOffset(15, 15, 5, 5)
         };
-        JourStyle.normal.textColor = Color.yellow;
+        textStyle.normal.textColor = Color.white;
 
-        // Dessiner le fond
-        GUI.DrawTexture(new Rect(10, 10, 200, 40), backgroundTexture);
-
-        // Afficher le Jour
-        string JourText = $"Jour: {Player.Jour}";
-        GUI.Label(new Rect(15, 10, 190, 40), JourText, JourStyle);
-
-        // Debug dans la console à chaque frame pour vérifier
-        if (Time.frameCount % 60 == 0) // Log toutes les ~1 seconde
+        // Style pour le titre
+        GUIStyle titleStyle = new GUIStyle(textStyle)
         {
-            Debug.Log($"Current Jour Display: {JourText}");
+            fontSize = 20, // Réduction de la taille de police du titre
+            fontStyle = FontStyle.Bold
+        };
+        titleStyle.normal.textColor = Color.yellow;
+
+        // Dimensions et positions
+        const float padding = 10f;
+        const float elementHeight = 30f;
+        const float legendWidth = 350f;
+        float totalHeight = 380f;
+        
+        // Position du score (en haut à gauche) - garde son opacité d'origine
+        Texture2D scoreBackgroundTexture = new Texture2D(1, 1);
+        scoreBackgroundTexture.SetPixel(0, 0, new Color(0, 0, 0, 0.7f));
+        scoreBackgroundTexture.Apply();
+        
+        GUI.DrawTexture(new Rect(padding, padding, legendWidth * 0.5f, elementHeight * 1.5f), scoreBackgroundTexture);
+        GUI.Label(new Rect(padding, padding, legendWidth * 0.5f, elementHeight), 
+            $"Jour: {Player.Jour}", titleStyle);
+
+        // Position de la légende (à droite) - avec le fond plus transparent
+        float rightPadding = Screen.width - legendWidth - padding;
+        GUI.DrawTexture(new Rect(rightPadding, padding, legendWidth, totalHeight), backgroundTexture);
+
+        float currentY = padding + 10f; // Ajout d'un peu d'espace en haut
+
+        // Section Nodes
+        GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
+            "Types de Lieux:", titleStyle);
+        currentY += elementHeight + 5f;
+
+        float iconSize = elementHeight - 4f;
+        float iconPadding = 15f;
+
+        if (ruinsSprite != null)
+        {
+            GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
+                ruinsSprite.texture);
+            GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
+                "Ruines - Site abandonné", textStyle);
         }
+        currentY += elementHeight;
+
+        if (citySprite != null)
+        {
+            GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
+                citySprite.texture);
+            GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
+                "Ville - Centre habité", textStyle);
+        }
+        currentY += elementHeight;
+
+        if (farmSprite != null)
+        {
+            GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
+                farmSprite.texture);
+            GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
+                "Ferme - Zone agricole", textStyle);
+        }
+        currentY += elementHeight;
+
+        if (dungeonSprite != null)
+        {
+            GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
+                dungeonSprite.texture);
+            GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
+                "Donjon - Zone dangereuse", textStyle);
+        }
+        currentY += elementHeight * 1.5f;
+
+        // Section Routes
+        GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
+            "Types de Routes:", titleStyle);
+        currentY += elementHeight + 5f;
+
+        textStyle.normal.textColor = new Color(0.6f, 0.4f, 0.2f);
+        GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
+            "■ Route de terre - 3 jours par déplacement", textStyle);
+        currentY += elementHeight;
+
+        textStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+        GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
+            "■ Route pavée - 2 jours par déplacement", textStyle);
+        currentY += elementHeight;
+
+        textStyle.normal.textColor = new Color(0.15f, 0.15f, 0.15f);
+        GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
+            "■ Grande route - 1 jour par déplacement", textStyle);
 
         // Nettoyage
         Destroy(backgroundTexture);
+        Destroy(scoreBackgroundTexture);
     }
 }
 
