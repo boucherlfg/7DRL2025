@@ -30,10 +30,6 @@ public class MapNode : MonoBehaviour
         {
             GameManager.Instance.AddMapNode(this);
         }
-        else
-        {
-            Debug.LogError("GameManager instance is null.");
-        }
     }
 
     private void UpdateNodeConnections()
@@ -55,10 +51,6 @@ public class MapNode : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.UpdateMapNode(this);
-        }
-        else
-        {
-            Debug.LogError("GameManager instance is null.");
         }
     }
 
@@ -127,10 +119,6 @@ public class MapNode : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddMapLink(this, otherNode);
-        }
-        else
-        {
-            Debug.LogError("GameManager instance is null.");
         }
     }
 
@@ -228,6 +216,18 @@ public class MapNode : MonoBehaviour
         return false;
     }
 
+    private Color GetRoadColor(MapNode otherNode)
+    {
+        // Définir les couleurs avec leurs points correspondants
+        Color[] roads = {
+            new Color(0.5f, 0.5f, 0.5f, 1f),  // Route en pierre (gris) = toujours 1 point
+            new Color(0.3f, 0.3f, 0.3f, 1f),  // Route en terre (gris foncé) = toujours 2 points
+            new Color(0.6f, 0.4f, 0.2f, 1f)   // Route en bois (marron) = toujours 3 points
+        };
+        
+        int roadType = Random.Range(0, roads.Length);
+        return roads[roadType];
+    }
     private void CreateVisualConnection(MapNode otherNode)
     {
         if (transform.parent == null) return;
@@ -263,18 +263,12 @@ public class MapNode : MonoBehaviour
             // 2. Essayer de trouver un chemin alternatif
             // 3. Ajuster légèrement les points de départ/fin
             // Pour cet exemple, on ne crée pas la connexion
-            Debug.Log("Connection ignorée : intersection détectée");
             Destroy(lineObj);
             return;
         }
 
         // Définir une seule couleur uniforme pour toute la ligne
-        Color lineColor = Random.Range(0, 3) switch
-        {
-            0 => new Color(0.6f, 0.4f, 0.2f, 1f), // Marron
-            1 => new Color(0.5f, 0.5f, 0.5f, 1f), // Gris
-            _ => new Color(0.3f, 0.3f, 0.3f, 1f)  // Gris foncé
-        };
+        Color lineColor = GetRoadColor(otherNode);
 
         // Appliquer la couleur uniformément
         line.material = new Material(Shader.Find("Sprites/Default"));
@@ -313,10 +307,6 @@ public class MapNode : MonoBehaviour
         {
             player.MoveToNode(this);
             Debug.Log($"Attempting to move to node of type {nodeType}");
-        }
-        else
-        {
-            Debug.LogError("PlayerController not found in scene!");
         }
     }
 

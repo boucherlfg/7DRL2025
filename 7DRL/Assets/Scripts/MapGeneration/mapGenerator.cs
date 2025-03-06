@@ -25,7 +25,6 @@ public class MapGenerator : MonoBehaviour
     {
         if (!ValidateComponents())
         {
-            Debug.LogError("Missing required components on MapGenerator!");
             enabled = false;
         }
         InitializeMap();
@@ -63,7 +62,6 @@ public class MapGenerator : MonoBehaviour
         {
             GameManager.Instance.AddMapNode(centerNode);
             GameManager.Instance.SpawnPlayer(centerNode);
-            Debug.Log($"Player spawned at center: {centerNode.transform.position}");
         }
 
         // Generate additional nodes for the first level (like before)
@@ -116,7 +114,6 @@ public class MapGenerator : MonoBehaviour
         node.connections = new List<MapNode>();
         node.level = 0;
 
-        Debug.Log($"Created node at position: {position}, Transform position: {node.transform.position}");
         return node;
     }
 
@@ -260,73 +257,58 @@ public class MapGenerator : MonoBehaviour
     {
         const int MAX_CONNECTIONS = 4;
         const float MAX_CONNECTION_DISTANCE = 8f;
-        const float FALLBACK_DISTANCE = 12f; // Distance plus grande pour les points isolés
+        const float FALLBACK_DISTANCE = 12f;
 
+        // Première passe : tenter de connecter chaque nouveau nœud normalement
         foreach (var newNode in newNodes)
         {
-            var isConnected = false;
-            var searchDistance = MAX_CONNECTION_DISTANCE;
-
-            while (!isConnected)
-            {
-                // Chercher connexion avec le graphe existant
-                var closestExisting = existingNodes
-                    .Where(n => Vector3.Distance(newNode.position, n.position) < searchDistance)
-                    .Where(n => !WouldCreateIntersection(newNode.position, n.position))
-                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                    .FirstOrDefault();
-
-                if (closestExisting != null)
-                {
-                    newNode.ConnectTo(closestExisting);
-                    isConnected = true;
-                }
-                else
-                {
-                    searchDistance = FALLBACK_DISTANCE; // Augmenter la distance si pas de connexion trouvée
-                }
-
-                // Si toujours pas connecté, forcer une connexion au plus proche sans vérifier les intersections
-                if (isConnected) continue;
-
-                var forceConnect = existingNodes
-                    .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                    .First();
-
-                newNode.ConnectTo(forceConnect);
-                isConnected = true;
-
-            }
-
-            // Ajouter des connexions supplémentaires aux autres nouveaux nœuds
-            var potentialNewConnections = newNodes
-                .Where(n => n != newNode)
-                .Where(n => Vector3.Distance(newNode.position, n.position) < MAX_CONNECTION_DISTANCE)
+            var availableNodes = existingNodes
+                .Where(n => n.connections.Count < MAX_CONNECTIONS)
                 .Where(n => !WouldCreateIntersection(newNode.position, n.position))
-                .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                .Take(2) // Limiter à 2 connexions supplémentaires
-                .ToList();
+                .Where(n => Vector3.Distance(newNode.position, n.position) <= MAX_CONNECTION_DISTANCE)
+                .OrderBy(n => Vector3.Distance(newNode.position, n.position));
 
-            potentialNewConnections
-                .Where(other => newNode.connections.Count < MAX_CONNECTIONS && other.connections.Count < MAX_CONNECTIONS)
-                .ToList()
-                .ForEach(other =>
-                {
-                    newNode.ConnectTo(other);
-                });
+            var closestNode = availableNodes.FirstOrDefault();
+            if (closestNode != null)
+            {
+                newNode.ConnectTo(closestNode);
+            }
         }
 
-        // Vérification finale pour les points isolés
+        // Deuxième passe : essayer avec une distance plus grande pour les nœuds non connectés
+        foreach (var newNode in newNodes.Where(n => n.connections.Count == 0))
+        {
+            var availableNodes = existingNodes
+                .Where(n => n.connections.Count < MAX_CONNECTIONS)
+                .Where(n => !WouldCreateIntersection(newNode.position, n.position))
+                .Where(n => Vector3.Distance(newNode.position, n.position) <= FALLBACK_DISTANCE)
+                .OrderBy(n => Vector3.Distance(newNode.position, n.position));
+
+            var closestNode = availableNodes.FirstOrDefault();
+            if (closestNode != null)
+            {
+                newNode.ConnectTo(closestNode);
+            }
+        }
+
+        // Passe finale : ajouter des connexions supplémentaires jusqu'à MAX_CONNECTIONS
         foreach (var newNode in newNodes)
         {
-            if (newNode.connections.Count != 0) continue;
+            while (newNode.connections.Count < MAX_CONNECTIONS)
+            {
+                var potentialConnections = existingNodes.Concat(newNodes)
+                    .Where(n => n != newNode)
+                    .Where(n => !newNode.connections.Contains(n))
+                    .Where(n => n.connections.Count < MAX_CONNECTIONS)
+                    .Where(n => Vector3.Distance(newNode.position, n.position) <= MAX_CONNECTION_DISTANCE)
+                    .Where(n => !WouldCreateIntersection(newNode.position, n.position))
+                    .OrderBy(n => Vector3.Distance(newNode.position, n.position));
 
-            var closestNode = existingNodes
-                .Concat(newNodes.Where(n => n != newNode))
-                .OrderBy(n => Vector3.Distance(newNode.position, n.position))
-                .First();
-
-            newNode.ConnectTo(closestNode);
+                var nextConnection = potentialConnections.FirstOrDefault();
+                if (nextConnection == null) break;
+                
+                newNode.ConnectTo(nextConnection);
+            }
         }
     }
 
