@@ -10,8 +10,11 @@ public class GameManager : MonoBehaviour
     public Sprite dungeonSprite;
     public static GameManager Instance { get; private set; }
 
-    public List<MapNode> MapNodes { get; private set; }
-    public List<(MapNode, MapNode, Color)> MapLinks { get; private set; } = new List<(MapNode, MapNode, Color)>();
+    //public List<MapNode> MapNodes { get; private set; } remplacé par le dico
+    public Dictionary<Vector3, NodeType> MapNodesDict { get; private set; }
+    //public List<(MapNode, MapNode, Color)> MapLinks { get; private set; } = new List<(MapNode, MapNode, Color)>(); remplacé par le dico
+    public Dictionary<(Vector3, Vector3), Color> MapLinksDict { get; private set; }
+
     public PlayerInfo Player { get; private set; }
     public GameObject playerPrefab;
     private PlayerController playerInstance;
@@ -66,17 +69,34 @@ public class GameManager : MonoBehaviour
 
     public void InitializeGameManager()
     {
-        MapNodes = new List<MapNode>();
-        MapLinks = new List<(MapNode, MapNode, Color)>();
+        // MapNodes = new List<MapNode>();
+        MapNodesDict = new Dictionary<Vector3, NodeType>();
+        MapLinksDict = new Dictionary<(Vector3, Vector3), Color>();
         Player = new PlayerInfo();
         playerInstance = null;
     }
 
     public void AddMapNode(MapNode node)
     {
-        MapNodes.Add(node);
+        // MapNodes.Add(node);
+        if(!MapNodesDict.ContainsKey(node.position)){
+                MapNodesDict.Add(node.position, node.GetNodeType());
+        }
     }
 
+    public bool IsNodeSaved(MapNode node)
+    {
+        return MapNodesDict.ContainsKey(node.position);
+    }
+
+    public NodeType GetNodeType(Vector3 position)
+    {
+        if (MapNodesDict.ContainsKey(position))
+        {
+            return MapNodesDict[position];
+        }
+        return NodeType.Ruins;
+    }
 
     private bool IsColorSimilar(Color a, Color b, float tolerance = 0.1f)
     {
@@ -100,18 +120,18 @@ public class GameManager : MonoBehaviour
     public void AddMapLink(MapNode node1, MapNode node2)
     {
         Color roadColor = GetRandomRoadColor();
-        MapLinks.Add((node1, node2, roadColor));
+        MapLinksDict.Add((node1.position, node2.position), roadColor);
         Debug.Log($"Added road with color: {ColorToString(roadColor)}");
     }
 
     // Method to get road color between two nodes
     public Color GetRoadColor(MapNode node1, MapNode node2)
     {
-        var link = MapLinks.Find(l => 
-            (l.Item1 == node1 && l.Item2 == node2) || 
-            (l.Item1 == node2 && l.Item2 == node1));
-        
-        return link.Item3;
+        if (MapLinksDict.ContainsKey((node1.position, node2.position)))
+        {
+            return MapLinksDict[(node1.position, node2.position)];
+        }
+        return Color.white;
     }
     // Method to get points for a road color
     public int GetPointsForRoad(Color roadColor)
@@ -141,28 +161,39 @@ public class GameManager : MonoBehaviour
         return Player.CurrentNode;
     }
 
+    //get dico
+    public Dictionary<Vector3, NodeType> GetMapNodesDict()
+    {
+        return MapNodesDict;
+    }
+
+    //get dico
+    public Dictionary<(Vector3, Vector3), Color> GetMapLinksDict()
+    {
+        return MapLinksDict;
+    }
+
     internal void UpdateMapNode(MapNode mapNode)
     {
-        //retrouver le node dans la liste
-        var node = MapNodes.Find(n => n == mapNode);
-        if (node != null)
+        //retrouver le node dans la liste grace à la position et mettre à jour le type
+        if (MapNodesDict.ContainsKey(mapNode.position))
         {
-            node = mapNode;
+            MapNodesDict[mapNode.position] = mapNode.GetNodeType();
         }
     }
 
     public void DrawMap(Vector3 offset)
     {
-        foreach (var link in MapLinks)
+        foreach (var link in MapLinksDict)
         {
-            Gizmos.color = link.Item3; // Utiliser la couleur stockée
-            Gizmos.DrawLine(link.Item1.position + offset, link.Item2.position + offset);
+            Gizmos.color = link.Value;
+            Gizmos.DrawLine(link.Key.Item1 + offset, link.Key.Item2 + offset);
         }
 
-        foreach (var node in MapNodes)
+        foreach (var kvp in MapNodesDict)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(node.position + offset, 0.2f);
+            Gizmos.DrawSphere(kvp.Key + offset, 0.2f);
         }
     }
 

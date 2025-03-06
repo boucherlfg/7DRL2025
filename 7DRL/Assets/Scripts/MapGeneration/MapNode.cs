@@ -56,9 +56,17 @@ public class MapNode : MonoBehaviour
 
     private void AssignRandomNodeType()
     {
-        nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
-        UpdateNodeSprite();
-        
+        if(GameManager.Instance.IsNodeSaved(this))
+        {
+            nodeType = GameManager.Instance.GetNodeType(this.position);
+            UpdateNodeSprite();
+            return;
+        }
+        else
+        {
+            nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
+            UpdateNodeSprite();
+        }
         if (GameManager.Instance != null)
         {
             GameManager.Instance.UpdateMapNode(this);
@@ -315,5 +323,5 @@ public class MapNode : MonoBehaviour
 
     
 
-    private NodeType GetNodeType() => nodeType;
+    public NodeType GetNodeType() => nodeType;
 }

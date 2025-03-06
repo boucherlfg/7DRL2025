@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -23,11 +24,27 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        DontDestroyOnLoad(gameObject);
         if (!ValidateComponents())
         {
             enabled = false;
         }
-        InitializeMap();
+        //verifier si dans le dontdestroyonload  il y a deja un noeud de map
+        //si non, on en crée une
+        //si oui, on fait rien
+        if (GameObject.Find("linePrefab(Clone)") != null)
+        { 
+            return;
+        }
+        else
+        {
+            InitializeMap();
+        }
+    }
+
+    public void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
     }
     private bool ValidateComponents()
     {
@@ -45,6 +62,10 @@ public class MapGenerator : MonoBehaviour
     }
     private void InitializeMap()
     {
+        if (levels.Count > 0)
+        {
+            return; // La carte a déjà été initialisée
+        }
         currentLevel = 1;
         var initialWidth = mapWidth;
         var initialHeight = mapHeight;
@@ -58,11 +79,11 @@ public class MapGenerator : MonoBehaviour
         initialLevel.points.Add(centerNode);
 
         // Spawn player on center node
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.AddMapNode(centerNode);
-            GameManager.Instance.SpawnPlayer(centerNode);
-        }
+        // if (GameManager.Instance != null)
+        // {
+        //     // GameManager.Instance.AddMapNode(centerNode);
+        //     GameManager.Instance.SpawnPlayer(centerNode);
+        // }
 
         // Generate additional nodes for the first level (like before)
         var allNodes = new List<MapNode> { centerNode };
@@ -77,10 +98,10 @@ public class MapGenerator : MonoBehaviour
             newNodes.Add(newNode);
             allNodes.Add(newNode);
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddMapNode(newNode);
-            }
+            // if (GameManager.Instance != null)
+            // {
+            //     GameManager.Instance.AddMapNode(newNode);
+            // }
         }
 
         // Connect the new nodes
@@ -197,10 +218,10 @@ public class MapGenerator : MonoBehaviour
                     newNodes.Add(newNode);
                     allNodes.Add(newNode);
 
-                    if (GameManager.Instance != null)
-                    {
-                        GameManager.Instance.AddMapNode(newNode);
-                    }
+                    // if (GameManager.Instance != null)
+                    // {
+                    //     GameManager.Instance.AddMapNode(newNode);
+                    // }
                 }
 
                 // Connect the new nodes
@@ -216,11 +237,22 @@ public class MapGenerator : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
+            HardResetMap();
+        }
+        if (Input.GetKeyDown(KeyCode.X)){
             ResetMap();
+        }
+        if (Input.GetKeyDown(KeyCode.V)){
+            RestoreMap(); //recupere la map sauvegardée dans le singleton
+        }
+        if(Input.GetKeyDown(KeyCode.J)){ //passer a la scène du jeu
+            Scene currentScene = SceneManager.GetActiveScene();
+
+            SceneManager.LoadScene(currentScene.name);
         }
     }
 
-   private void ResetMap()
+   private void HardResetMap()
     {
         // First clean up the player if it exists
         if (GameManager.Instance != null)
@@ -242,6 +274,64 @@ public class MapGenerator : MonoBehaviour
         levels.Clear();
         InitializeMap();
     }
+
+    private void ResetMap()
+    {
+        // First clean up the player if it exists
+        if (GameManager.Instance != null)
+        {
+            var playerController = FindFirstObjectByType<PlayerController>();
+            if (playerController != null)
+            {
+                DestroyImmediate(playerController.gameObject);
+            }
+        }
+
+        // Then clean up map nodes
+        while (transform.childCount > 0)
+        {
+            DestroyImmediate(transform.GetChild(0).gameObject);
+        }
+
+        levels.Clear();
+    }
+
+    public void RestoreMap(){
+        if(GameManager.Instance != null){
+            //levels = GameManager.Instance.GetMapLevels();
+            //currentLevel = GameManager.Instance.GetCurrentLevel();
+            //recréer les nodes à partir des données sauvegardées dans le dico de GameManager
+            foreach (var kvp in GameManager.Instance.GetMapNodesDict())
+            {
+                var newNode = CreatePointNode(kvp.Key);
+                //level;
+                //connections
+                
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.AddMapNode(newNode);
+                }
+            }
+
+            foreach (var kvp in GameManager.Instance.GetMapLinksDict())
+            {
+                //ajouter les connections
+                var posNode1 = kvp.Key.Item1;
+                var posNode2 = kvp.Key.Item2;
+                GetMapNode(posNode1).ConnectTo(GetMapNode(posNode2));
+            }
+
+            UpdateVisibility();
+        }
+    }
+
+    private MapNode GetMapNode(Vector3 position)
+    {
+        return levels
+            .SelectMany(level => level.points)
+            .FirstOrDefault(node => node.position == position);
+    }
+
     private void UpdateVisibility()
     {
         levels?.ForEach(level =>
@@ -365,10 +455,10 @@ public class MapGenerator : MonoBehaviour
             newNodes.Add(newNode);
             allNodes.Add(newNode);
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.AddMapNode(newNode);
-            }
+            // if (GameManager.Instance != null)
+            // {
+            //     GameManager.Instance.AddMapNode(newNode);
+            // }
         }
 
         // Connect the new nodes
