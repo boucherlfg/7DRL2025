@@ -55,44 +55,52 @@ public class PlayerController : MonoBehaviour
     {
         if (fromNode == null || toNode == null) return;
 
+        Debug.Log($"Checking road between {fromNode.name} and {toNode.name}");
         var lines = fromNode.transform.parent.GetComponentsInChildren<LineRenderer>();
+        
         foreach (var line in lines)
         {
             Vector3 pos0 = line.GetPosition(0);
             Vector3 pos1 = line.GetPosition(1);
 
+            float detectionThreshold = 1.5f;
             bool isConnecting = 
-                (Vector3.Distance(pos0, fromNode.transform.position) < 0.5f && 
-                Vector3.Distance(pos1, toNode.transform.position) < 0.5f) ||
-                (Vector3.Distance(pos1, fromNode.transform.position) < 0.5f && 
-                Vector3.Distance(pos0, toNode.transform.position) < 0.5f);
+                (Vector3.Distance(pos0, fromNode.transform.position) < detectionThreshold && 
+                Vector3.Distance(pos1, toNode.transform.position) < detectionThreshold) ||
+                (Vector3.Distance(pos1, fromNode.transform.position) < detectionThreshold && 
+                Vector3.Distance(pos0, toNode.transform.position) < detectionThreshold);
 
             if (isConnecting)
             {
                 Color roadColor = line.startColor;
-                Debug.Log($"Detected road color: R:{roadColor.r:F3}, G:{roadColor.g:F3}, B:{roadColor.b:F3}");
+                Debug.Log($"Found connecting road with color: R:{roadColor.r:F3}, G:{roadColor.g:F3}, B:{roadColor.b:F3}");
 
                 // Routes grises = toujours 1 point
-                if (IsColorSimilar(roadColor, new Color(0.5f, 0.5f, 0.5f)))
+                if (IsColorSimilar(roadColor, new Color(0.5f, 0.5f, 0.5f, 1f), 0.2f))
                 {
                     GameManager.Instance?.AddPoints(1);
                     Debug.Log("Stone road (gray) = 1 point");
                 }
-                // Routes gris foncé = toujours 2 points
-                else if (IsColorSimilar(roadColor, new Color(0.3f, 0.3f, 0.3f)))
+                // Routes noires = toujours 2 points
+                else if (IsColorSimilar(roadColor, new Color(0.0f, 0.0f, 0.0f, 1f), 0.2f))
                 {
                     GameManager.Instance?.AddPoints(2);
-                    Debug.Log("Dirt road (dark gray) = 2 points");
+                    Debug.Log("Asphalt road (black) = 2 points");
                 }
                 // Routes marron = toujours 3 points
-                else if (IsColorSimilar(roadColor, new Color(0.6f, 0.4f, 0.2f)))
+                else if (IsColorSimilar(roadColor, new Color(0.6f, 0.4f, 0.2f, 1f), 0.2f))
                 {
                     GameManager.Instance?.AddPoints(3);
                     Debug.Log("Wood road (brown) = 3 points");
                 }
+                else 
+                {
+                    Debug.LogWarning($"Unrecognized road color: {ColorToString(roadColor)}");
+                }
                 return;
             }
         }
+        Debug.LogWarning("No connecting road found!");
     }
 
     private bool IsColorSimilar(Color a, Color b, float tolerance = 0.1f)

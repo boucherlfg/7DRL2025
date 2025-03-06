@@ -32,17 +32,6 @@ public class MapNode : MonoBehaviour
         }
     }
 
-    private void UpdateNodeConnections()
-    {
-        if (connections == null) return;
-        
-        foreach (var connection in connections.ToList())
-        {
-            // Recréer la connexion visuelle
-            CreateVisualConnection(connection);
-        }
-    }
-
     private void AssignRandomNodeType()
     {
         nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
@@ -99,30 +88,17 @@ public class MapNode : MonoBehaviour
     {
         if (otherNode == null || connections.Contains(otherNode)) return;
 
-        // Supprimer les anciennes connexions visuelles si elles existent
-        if (transform.parent != null)
-        {
-            var existingLines = transform.parent.GetComponentsInChildren<LineRenderer>();
-            foreach (var line in existingLines)
-            {
-                if (IsConnectedToLine(line) && IsNodeConnectedToLine(otherNode, line))
-                {
-                    Destroy(line.gameObject);
-                }
-            }
-        }
-
         connections.Add(otherNode);
         otherNode.connections.Add(this);
-        CreateVisualConnection(otherNode);
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddMapLink(this, otherNode);
+            Color roadColor = GameManager.Instance.GetRoadColor(this, otherNode);
+            CreateVisualConnection(otherNode, roadColor);
         }
     }
 
-    // Ajouter cette méthode helper
     private bool IsNodeConnectedToLine(MapNode node, LineRenderer line)
     {
         if (line == null || node == null) return false;
@@ -216,19 +192,13 @@ public class MapNode : MonoBehaviour
         return false;
     }
 
-    private Color GetRoadColor(MapNode otherNode)
+    public Color GetRoadColor(MapNode toNode)
     {
-        // Définir les couleurs avec leurs points correspondants
-        Color[] roads = {
-            new Color(0.5f, 0.5f, 0.5f, 1f),  // Route en pierre (gris) = toujours 1 point
-            new Color(0.3f, 0.3f, 0.3f, 1f),  // Route en terre (gris foncé) = toujours 2 points
-            new Color(0.6f, 0.4f, 0.2f, 1f)   // Route en bois (marron) = toujours 3 points
-        };
-        
-        int roadType = Random.Range(0, roads.Length);
-        return roads[roadType];
+        if (GameManager.Instance == null) return Color.white;
+        return GameManager.Instance.GetRoadColor(this, toNode);
     }
-    private void CreateVisualConnection(MapNode otherNode)
+
+    private void CreateVisualConnection(MapNode otherNode, Color roadColor)
     {
         if (transform.parent == null) return;
         if (spriteRenderer == null)
@@ -258,34 +228,36 @@ public class MapNode : MonoBehaviour
         // Vérifier si la nouvelle ligne intersecte avec des lignes existantes
         if (WouldIntersectExistingLines(startPos, endPos))
         {
-            // Si il y a intersection, on peut soit:
-            // 1. Ne pas créer la connexion
-            // 2. Essayer de trouver un chemin alternatif
-            // 3. Ajuster légèrement les points de départ/fin
-            // Pour cet exemple, on ne crée pas la connexion
             Destroy(lineObj);
             return;
         }
 
-        // Définir une seule couleur uniforme pour toute la ligne
-        Color lineColor = GetRoadColor(otherNode);
-
-        // Appliquer la couleur uniformément
+        // Apply the road color
         line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = lineColor;
-        line.endColor = lineColor;
+        line.startColor = roadColor;
+        line.endColor = roadColor;
 
-        // Paramètres de la ligne
+        // Set line parameters
         line.startWidth = 0.1f;
         line.endWidth = 0.1f;
         line.positionCount = 2;
         line.SetPosition(0, startPos);
         line.SetPosition(1, endPos);
         line.sortingOrder = -1;
+    }
 
-        if (GameManager.Instance != null)
+    private void UpdateNodeConnections()
+    {
+        if (connections == null) return;
+        
+        foreach (var connection in connections.ToList())
         {
-            GameManager.Instance.AddMapLink(this, otherNode);
+            if (GameManager.Instance != null)
+            {
+                // Use GameManager to get the road color
+                Color roadColor = GameManager.Instance.GetRoadColor(this, connection);
+                CreateVisualConnection(connection, roadColor);
+            }
         }
     }
     
