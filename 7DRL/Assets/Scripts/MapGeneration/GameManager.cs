@@ -279,12 +279,12 @@ public class GameManager : MonoBehaviour
             "■ Route de terre - 3 jours par déplacement", textStyle);
         currentY += elementHeight;
 
-        textStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+        textStyle.normal.textColor = new Color(0.15f, 0.15f, 0.15f);
         GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
             "■ Route pavée - 2 jours par déplacement", textStyle);
         currentY += elementHeight;
 
-        textStyle.normal.textColor = new Color(0.15f, 0.15f, 0.15f);
+        textStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
         GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 
             "■ Grande route - 1 jour par déplacement", textStyle);
 
