@@ -34,6 +34,8 @@ public class MapGenerator : MonoBehaviour
         //si oui, on fait rien
         if (GameObject.Find("linePrefab(Clone)") != null)
         { 
+            //remmetre le joueur sur le bon node avec les bonnes valeurs
+            GameManager.Instance.SpawnPlayer(GameManager.Instance.GetPlayerPosition());
             return;
         }
         else
@@ -79,11 +81,11 @@ public class MapGenerator : MonoBehaviour
         initialLevel.points.Add(centerNode);
 
         // Spawn player on center node
-        // if (GameManager.Instance != null)
-        // {
-        //     // GameManager.Instance.AddMapNode(centerNode);
-        //     GameManager.Instance.SpawnPlayer(centerNode);
-        // }
+        if (GameManager.Instance != null)
+        {
+            // GameManager.Instance.AddMapNode(centerNode);
+            GameManager.Instance.SpawnPlayer(centerNode);
+        }
 
         // Generate additional nodes for the first level (like before)
         var allNodes = new List<MapNode> { centerNode };

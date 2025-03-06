@@ -9,10 +9,7 @@ public class GameManager : MonoBehaviour
     public Sprite farmSprite;
     public Sprite dungeonSprite;
     public static GameManager Instance { get; private set; }
-
-    //public List<MapNode> MapNodes { get; private set; } remplacé par le dico
     public Dictionary<Vector3, NodeType> MapNodesDict { get; private set; }
-    //public List<(MapNode, MapNode, Color)> MapLinks { get; private set; } = new List<(MapNode, MapNode, Color)>(); remplacé par le dico
     public Dictionary<(Vector3, Vector3), Color> MapLinksDict { get; private set; }
 
     public PlayerInfo Player { get; private set; }
@@ -131,6 +128,7 @@ public class GameManager : MonoBehaviour
         {
             return MapLinksDict[(node1.position, node2.position)];
         }
+        Debug.LogWarning("No road color found!, node1: " + node1.position + " node2: " + node2.position);
         return Color.white;
     }
     // Method to get points for a road color

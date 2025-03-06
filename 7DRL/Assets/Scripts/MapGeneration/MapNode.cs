@@ -26,7 +26,7 @@ public class MapNode : MonoBehaviour
         
         UpdateSpriteVisibility();
         AssignRandomNodeType();
-        UpdateNodeConnections();
+        //UpdateNodeConnections();
 
         if (GameManager.Instance != null)
         {
