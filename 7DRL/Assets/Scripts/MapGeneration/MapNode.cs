@@ -134,9 +134,18 @@ public class MapNode : MonoBehaviour
     {
         if (spriteRenderer != null)
         {
-            spriteRenderer.enabled = level <= currentLevel;
+            // Ne modifie la visibilité que si le joueur n'est pas sur ce node
+            if (!isPlayerHere)
+            {
+                spriteRenderer.enabled = level <= currentLevel;
+            }
+            else
+            {
+                spriteRenderer.enabled = false; // Force le sprite à rester caché si le joueur est là
+            }
         }
 
+        // Reste du code pour les lignes
         if (transform.parent == null) return;
 
         foreach (Transform child in transform.parent)
