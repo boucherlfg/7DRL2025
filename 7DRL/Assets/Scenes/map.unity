@@ -163,6 +163,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81beff969a125274da47eb093c34d77a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ruinsSprite: {fileID: 584374925798354339, guid: 140f037160f53e34eb978f9672d3c70c, type: 3}
+  citySprite: {fileID: 8357441575128055077, guid: aeac8b186b5d60e49ab309589e17fcf8, type: 3}
+  farmSprite: {fileID: -2680004415806329950, guid: 1a8bdea2b18928846abce3f7cae4e91b, type: 3}
+  dungeonSprite: {fileID: 1921053324792869636, guid: f175b84717506444f9ae789020c77fb4, type: 3}
   playerPrefab: {fileID: 2830048250800258166, guid: 806491a2996b3914980347c4671df38b, type: 3}
 --- !u!1 &536494449
 GameObject:
