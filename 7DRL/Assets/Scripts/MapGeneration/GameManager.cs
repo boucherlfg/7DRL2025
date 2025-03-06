@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
-
+using System.Linq;
 public class GameManager : MonoBehaviour
 {
     public Sprite ruinsSprite;
@@ -174,7 +174,21 @@ public class GameManager : MonoBehaviour
         }
         
         Player.Jour += points;
-        Debug.Log($"Points added: +{points}, Total Jour: {Player.Jour}");
+        Debug.Log($"Points added: +{points}, Total Jour: {Player.Jour}, Level : {Player.Level}" );
+
+        // Vérifier si nous devons augmenter le niveau
+        if (Player.Jour >= Player.Level * 30)
+        {
+            Player.Level++;
+            Debug.Log($"Level increased to {Player.Level}");
+            
+            var mapGenerator = FindFirstObjectByType<MapGenerator>();
+            if (mapGenerator != null)
+            {
+                // Simuler l'appui sur la touche espace pour générer un nouveau niveau
+                mapGenerator.GenerateNewLevel();
+            }
+        }
     }
 
     private void OnGUI()
@@ -297,6 +311,6 @@ public class GameManager : MonoBehaviour
 public class PlayerInfo
 {
     public int Jour { get; set; } = 0;
-    public int Level { get; set; }
+    public int Level { get; set; } = 1;
     public MapNode CurrentNode { get; set; } // Position actuelle du joueur
 }

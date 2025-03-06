@@ -337,4 +337,48 @@ public class MapGenerator : MonoBehaviour
     {
         levels.Add(level);
     }
+
+    public void GenerateNewLevel()
+    {
+        if (currentLevel >= maxLevels) return;
+
+        var currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+        var currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+
+        // Collect all existing nodes
+        var allNodes = new List<MapNode>();
+        foreach (var level in levels)
+        {
+            allNodes.AddRange(level.points);
+        }
+
+        // Create new level with 10 points
+        var newLevel = new MapLevel(10, currentWidth, currentHeight);
+        var newNodes = new List<MapNode>();
+
+        // Generate 10 new points with optimal positions
+        for (var i = 0; i < 10; i++)
+        {
+            var newPosition = FindOptimalPosition(allNodes, currentWidth, currentHeight);
+            var newNode = CreatePointNode(newPosition);
+            newNode.level = currentLevel + 1;
+            newNodes.Add(newNode);
+            allNodes.Add(newNode);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddMapNode(newNode);
+            }
+        }
+
+        // Connect the new nodes
+        ConnectNewNodes(newNodes, allNodes.Except(newNodes).ToList());
+
+        // Add to level after connections are made
+        newLevel.points.AddRange(newNodes);
+        levels.Add(newLevel);
+
+        currentLevel++;
+        UpdateVisibility();
+    }
 }
