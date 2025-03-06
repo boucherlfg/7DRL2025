@@ -15,12 +15,41 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    private IEnumerator MoveAlongPath(MapNode targetNode)
+    {
+        if (targetNode == null || targetNode.transform == null) yield break;
+        
+        isMoving = true;
+        targetPosition = targetNode.transform.position;
+
+        // Faire réapparaître le node actuel avant de partir
+        if (currentNode != null)
+        {
+            currentNode.OnPlayerExit();
+        }
+        
+        while (isMoving)
+        {
+            yield return null;
+        }
+
+        // Faire disparaître le nouveau node
+        targetNode.OnPlayerEnter();
+
+        // Ajouter les points après le déplacement
+        AddPointsForRoad(currentNode, targetNode);
+        currentNode = targetNode;
+        GameManager.Instance?.SetPlayerPosition(currentNode);
+    }
+
     public void InitializePosition(MapNode startNode)
     {
         if (startNode != null)
         {
             currentNode = startNode;
             transform.position = startNode.transform.position;
+            // Faire disparaître le node initial
+            startNode.OnPlayerEnter();
         }
     }
 
@@ -120,23 +149,5 @@ public class PlayerController : MonoBehaviour
         return Mathf.Approximately(a.r, b.r) && 
             Mathf.Approximately(a.g, b.g) && 
             Mathf.Approximately(a.b, b.b);
-    }
-
-    private IEnumerator MoveAlongPath(MapNode targetNode)
-    {
-        if (targetNode == null || targetNode.transform == null) yield break;
-        
-        isMoving = true;
-        targetPosition = targetNode.transform.position;
-        
-        while (isMoving)
-        {
-            yield return null;
-        }
-
-        // Ajouter les points après le déplacement
-        AddPointsForRoad(currentNode, targetNode);
-        currentNode = targetNode;
-        GameManager.Instance?.SetPlayerPosition(currentNode);
     }
 }

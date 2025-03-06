@@ -41,6 +41,9 @@ public class GameManager : MonoBehaviour
 
         if (playerInstance == null && playerPrefab != null)
         {
+            // Call OnPlayerEnter before instantiating the player
+            startNode.OnPlayerEnter();
+
             // Instantiate exactly at the node's transform position
             Vector3 spawnPosition = startNode.transform.position;
             GameObject playerObj = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
@@ -51,7 +54,6 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            // Make sure the player stays at the exact node position
             playerInstance.transform.position = spawnPosition;
             playerInstance.InitializePosition(startNode);
             SetPlayerPosition(startNode);

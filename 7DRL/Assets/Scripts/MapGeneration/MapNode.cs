@@ -11,6 +11,7 @@ public class MapNode : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Vector3 originalScale;
     private NodeType nodeType;
+    private bool isPlayerHere = false;
 
     private void Start()
     {
@@ -23,12 +24,33 @@ public class MapNode : MonoBehaviour
             spriteRenderer.material = new Material(Shader.Find("Sprites/Default"));
         }
         
+        UpdateSpriteVisibility();
         AssignRandomNodeType();
-        UpdateNodeConnections(); // Ajouter cette ligne
+        UpdateNodeConnections();
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddMapNode(this);
+        }
+    }
+
+    public void OnPlayerEnter()
+    {
+        isPlayerHere = true;
+        UpdateSpriteVisibility();
+    }
+
+    public void OnPlayerExit()
+    {
+        isPlayerHere = false;
+        UpdateSpriteVisibility();
+    }
+
+    private void UpdateSpriteVisibility()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = !isPlayerHere;
         }
     }
 
