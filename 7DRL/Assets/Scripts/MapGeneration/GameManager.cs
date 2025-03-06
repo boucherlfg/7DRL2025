@@ -131,23 +131,6 @@ public class GameManager : MonoBehaviour
         Debug.LogWarning("No road color found!, node1: " + node1.position + " node2: " + node2.position);
         return Color.white;
     }
-    // Method to get points for a road color
-    public int GetPointsForRoad(Color roadColor)
-    {
-        foreach (var roadType in roadTypes)
-        {
-            if (IsColorSimilar(roadColor, roadType.color))
-            {
-                return roadType.points;
-            }
-        }
-        return 0;
-    }
-
-    public void SetPlayerInfo(PlayerInfo playerInfo)
-    {
-        Player = playerInfo;
-    }
 
     public void SetPlayerPosition(MapNode node)
     {

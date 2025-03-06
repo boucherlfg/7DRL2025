@@ -241,12 +241,6 @@ public class MapGenerator : MonoBehaviour
         {
             HardResetMap();
         }
-        if (Input.GetKeyDown(KeyCode.X)){
-            ResetMap();
-        }
-        if (Input.GetKeyDown(KeyCode.V)){
-            RestoreMap(); //recupere la map sauvegardée dans le singleton
-        }
         if(Input.GetKeyDown(KeyCode.J)){ //passer a la scène du jeu
             Scene currentScene = SceneManager.GetActiveScene();
 
