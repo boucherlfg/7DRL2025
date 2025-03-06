@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class MapGenerator : MonoBehaviour
 {
+    public static MapGenerator Instance { get; private set; }
     [Header("Node Prefabs")]
     public GameObject nodePrefab;  // Prefab de base avec SpriteRenderer
     public Sprite ruinsSprite;     // Sprite pour les ruines
@@ -24,7 +25,8 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
-        DontDestroyOnLoad(gameObject);
+        Debug.Log("MapGenerator Start");
+        
         if (!ValidateComponents())
         {
             enabled = false;
@@ -36,11 +38,15 @@ public class MapGenerator : MonoBehaviour
         { 
             //remmetre le joueur sur le bon node avec les bonnes valeurs
             GameManager.Instance.SpawnPlayer(GameManager.Instance.GetPlayerPosition());
+            //set the name of MapManager to MapManager1 on the scene
+            //detruire le mapManager actuel
+            Destroy(gameObject);
             return;
         }
         else
         {
             InitializeMap();
+            DontDestroyOnLoad(gameObject);
         }
     }
 
@@ -408,14 +414,52 @@ public class MapGenerator : MonoBehaviour
 
     private bool LinesIntersect(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
     {
-        var denominator = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+        float lineWidth = 0.1f;
+        // Create rectangles around the lines
+        var rect1 = CreateRectangleAroundLine(p1, p2, lineWidth);
+        var rect2 = CreateRectangleAroundLine(p3, p4, lineWidth);
 
-        if (denominator == 0) return false;
+        // Check if the rectangles intersect
+        return RectanglesIntersect(rect1, rect2);
+    }
 
-        var ua = (((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x))) / denominator;
-        var ub = (((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x))) / denominator;
+    private (Vector3, Vector3, Vector3, Vector3) CreateRectangleAroundLine(Vector3 start, Vector3 end, float lineWidth)
+    {
+        Vector3 direction = (end - start).normalized;
+        Vector3 perpendicular = new Vector3(-direction.y, direction.x, direction.z) * lineWidth / 2;
 
-        return ua > 0 && ua < 1 && ub > 0 && ub < 1;
+        Vector3 p1 = start + perpendicular;
+        Vector3 p2 = start - perpendicular;
+        Vector3 p3 = end + perpendicular;
+        Vector3 p4 = end - perpendicular;
+
+        return (p1, p2, p3, p4);
+    }
+
+    private bool RectanglesIntersect((Vector3, Vector3, Vector3, Vector3) rect1, (Vector3, Vector3, Vector3, Vector3) rect2)
+    {
+        var (r1p1, r1p2, r1p3, r1p4) = rect1;
+        var (r2p1, r2p2, r2p3, r2p4) = rect2;
+
+        return IsPointInRectangle(r1p1, rect2) || IsPointInRectangle(r1p2, rect2) || IsPointInRectangle(r1p3, rect2) || IsPointInRectangle(r1p4, rect2) ||
+            IsPointInRectangle(r2p1, rect1) || IsPointInRectangle(r2p2, rect1) || IsPointInRectangle(r2p3, rect1) || IsPointInRectangle(r2p4, rect1);
+    }
+
+    private bool IsPointInRectangle(Vector3 point, (Vector3, Vector3, Vector3, Vector3) rect)
+    {
+        var (p1, p2, p3, p4) = rect;
+
+        float sign(Vector3 p, Vector3 q, Vector3 r)
+        {
+            return (p.x - r.x) * (q.y - r.y) - (q.x - r.x) * (p.y - r.y);
+        }
+
+        bool b1 = sign(point, p1, p2) < 0.0f;
+        bool b2 = sign(point, p2, p3) < 0.0f;
+        bool b3 = sign(point, p3, p4) < 0.0f;
+        bool b4 = sign(point, p4, p1) < 0.0f;
+
+        return ((b1 == b2) && (b2 == b3) && (b3 == b4));
     }
 
     public List<MapLevel> GetLevels() => levels;
