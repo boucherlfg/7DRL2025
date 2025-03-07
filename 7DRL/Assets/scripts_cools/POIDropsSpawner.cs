@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.UI;
 public class POIDropsSpawner : MonoBehaviour
 {
     public GameObject spawnerPrefab;
@@ -7,6 +7,20 @@ public class POIDropsSpawner : MonoBehaviour
     public ItemType ressourceFavorisee;
     public ItemType ressourceDefavorisee;
     public ItemType[] ressourcesDisponibles;
+    public Sprite[] spritesArmes;
+    public Sprite[] spritesArmures;
+
+    public Sprite[] spritesNourritures;
+
+    public Sprite[] spritesPotions;
+
+    public Sprite[] spritesPlantes;
+
+    public Sprite[] spritesLuxes;
+
+    public Sprite[] spritesMinerais;
+
+
     public int tierPotentiel;
     public GameObject[] spawnPoints;
     public GameObject ressourcesSpawner;
@@ -50,6 +64,7 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().armesList[j].tier<=tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().armesList[j]);
                         }
+                        ressourcesSpawner.GetComponent<Image>().sprite = spritesArmes[tierPotentiel];
                     }
                 break;
 
@@ -58,6 +73,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().armuresList[j].tier<=tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().armuresList[j]);
                         }
+                        ressourcesSpawner.GetComponent<Image>().sprite = spritesArmures[tierPotentiel];
+
                     }
                 break;
 
@@ -66,6 +83,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().potionsList[j].tier<= tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().potionsList[j]);
                         }
+                    ressourcesSpawner.GetComponent<Image>().sprite = spritesPotions[tierPotentiel];
+
                     }
                 break;
 
@@ -74,6 +93,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().nourrituresList[j].tier<= tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().nourrituresList[j]);
                         }
+                        ressourcesSpawner.GetComponent<Image>().sprite = spritesNourritures[tierPotentiel];
+                        
                     }
                 break;
 
@@ -82,6 +103,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().mineraisList[j].tier<=tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().mineraisList[j]);
                         }
+                        ressourcesSpawner.GetComponent<Image>().sprite = spritesMinerais[tierPotentiel];
+
                     }
                 break;
 
@@ -90,6 +113,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().luxesList[j].tier<= tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().luxesList[j]);
                         }
+                    ressourcesSpawner.GetComponent<Image>().sprite = spritesLuxes[tierPotentiel];
+
                     }
                 break;
 
@@ -98,6 +123,8 @@ public class POIDropsSpawner : MonoBehaviour
                         if(databaseObject.GetComponent<dataBaseV3>().plantesList[j].tier<= tierPotentiel){
                             ressourcesSpawner.GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().plantesList[j]);
                         }
+                    ressourcesSpawner.GetComponent<Image>().sprite = spritesPlantes[tierPotentiel];
+
                     }
 
                 break;

@@ -17,7 +17,7 @@ public void addItem(){
 
   int randomChiffre = Random.Range(0, dropsPossibles.Count);
   GestionRessourcesConcreteSingleton.Instance.listSac.Add(dropsPossibles[randomChiffre]);
- Debug.Log(GestionRessourcesConcreteSingleton.Instance.listSac.Count);
+ Debug.Log(GestionRessourcesConcreteSingleton.Instance.listSac[GestionRessourcesConcreteSingleton.Instance.listSac.Count-1]);
 
 //  GestionRessourcesConcreteSingleton.Instance.quantiteRessourcesTotal += dropsPossibles[randomChiffre].valeur;
 

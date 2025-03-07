@@ -15,7 +15,7 @@ public class GestionRessourcesConcreteSingleton : Singleton<GestionRessourcesCon
     public int quantiteRessourcesPotion = 0;
     public int quantiteRessourcesPlante = 0;
     public int quantiteRessourcesLuxe = 0;
-    public int tierActuel = 1;
+    public int tierActuel = 0;
     public  List<Item> listSac = new List<Item>();
     
 
