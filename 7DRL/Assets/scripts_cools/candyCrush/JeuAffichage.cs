@@ -60,14 +60,14 @@ public class JeuAffichage : MonoBehaviour
             types[i].quantite = 0;
         }
 
-        for (int i = 0; i < items.Count; i++)
+        for (int i = 0; i < GestionRessourcesConcreteSingleton.Instance.listSac.Count; i++)
         {
             for(int j = 0; j<types.Count; j++)
             {
-                if (items[i].itemType.ToString() == types[j].itemType.ToString())
+                if (GestionRessourcesConcreteSingleton.Instance.listSac[i].itemType.ToString() == types[j].itemType.ToString())
                 {
-                    types[j].quantite += items[i].valeur;
-                    quantiteRessourcesTotal += items[i].valeur;
+                    types[j].quantite += GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
+                    quantiteRessourcesTotal += GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
                 }
             }
         }

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
   m_Name: minerai1
   m_EditorClassIdentifier: 
-  id: 0
-  itemName: 
+  id: 8
+  itemName: premier
   itemType: 4
-  valeur: 2
+  valeur: 1
   tier: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: -3220934724489488328, guid: b1836a59da70e1b458cb06594645ef28, type: 3}
   icon: {fileID: 0}

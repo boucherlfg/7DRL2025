@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
+
 public class POIDropsSpawner : MonoBehaviour
 {
     public GameObject spawnerPrefab;
@@ -7,6 +10,24 @@ public class POIDropsSpawner : MonoBehaviour
     public ItemType ressourceFavorisee;
     public ItemType ressourceDefavorisee;
     public ItemType[] ressourcesDisponibles;
+
+    public GameObject[] arrayGameObjectSpawnersArmes;
+    public GameObject[] arrayGameObjectSpawnersArmures;
+    public GameObject[] arrayGameObjectSpawnersNourritures;
+    public GameObject[] arrayGameObjectSpawnersPotions;    
+    public GameObject[] arrayGameObjectSpawnersPlantes;
+    public GameObject[] arrayGameObjectSpawnersMinerais;
+    public GameObject[] arrayGameObjectSpawnersLuxes;
+
+
+    public Sprite spriteTypeArme;
+    public Sprite spriteTypeArmure;
+    public Sprite spriteTypeMinerai;
+    public Sprite spriteTypePlante;
+    public Sprite spriteTypeLuxe;
+    public Sprite spriteTypePotion;
+    public Sprite spriteTypeNourriture;
+
     public Sprite[] spritesArmes;
     public Sprite[] spritesArmures;
 
@@ -19,6 +40,11 @@ public class POIDropsSpawner : MonoBehaviour
     public Sprite[] spritesLuxes;
 
     public Sprite[] spritesMinerais;
+    public Image itemImage;
+    public Image itemTypeImage;
+    public TMP_Text itemName;
+    public TMP_Text itemValue;
+
 
 
     public int tierPotentiel;
@@ -28,8 +54,19 @@ public class POIDropsSpawner : MonoBehaviour
 
     void Start()
     {
-        RessourcesDeFavSetup();
-        RessourcesSpawn();
+        GestionRessourcesConcreteSingleton.Instance.nombreRecherchesRestantes = 5;
+       // RessourcesDeFavSetup();
+        //RessourcesSpawn();
+      //  public GameObject[] arrayArraySpawners = new GameObject[]{arrayGameObjectSpawnersArmes, arrayGameObjectSpawnersArmures};
+        AjoutRessources(arrayGameObjectSpawnersArmes,"Arme");
+        AjoutRessources(arrayGameObjectSpawnersNourritures,"Nourriture");
+        AjoutRessources(arrayGameObjectSpawnersPotions,"Potion");
+        AjoutRessources(arrayGameObjectSpawnersPlantes,"Plante");
+        AjoutRessources(arrayGameObjectSpawnersMinerais,"Minerai");
+        AjoutRessources(arrayGameObjectSpawnersLuxes,"Luxe");
+        AjoutRessources(arrayGameObjectSpawnersArmures,"Armure");
+
+
     }
 
     void RessourcesDeFavSetup(){
@@ -56,6 +93,8 @@ public class POIDropsSpawner : MonoBehaviour
             }
 
           ressourcesSpawner = Instantiate (spawnerPrefab, spawnPoints[i].transform);
+
+
 
             switch (ressourcesDisponibles[i].ToString())
             {
@@ -143,5 +182,105 @@ public class POIDropsSpawner : MonoBehaviour
 }
 
 }
+        public void AjoutRessources(GameObject[] arrayGameObject,string leType ){
 
+            for (int k = 0; k< arrayGameObject.Length; k++){
+                arrayGameObject[k].GetComponent<POIDrops>().itemImage = this.itemImage;
+                arrayGameObject[k].GetComponent<POIDrops>().itemTypeImage = this.itemTypeImage;
+                arrayGameObject[k].GetComponent<POIDrops>().itemName = this.itemName;
+                arrayGameObject[k].GetComponent<POIDrops>().itemValue = this.itemValue;
+                Debug.Log("yippie");
+            }
+switch (leType)
+            {
+                 case "Arme":
+                 for (int i = 0 ; i< arrayGameObject.Length; i++){
+
+                         arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypeArme;
+
+                    for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().armesList.Count; j++){
+                        if(databaseObject.GetComponent<dataBaseV3>().armesList[j].tier<=tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().armesList[j]);
+                        }
+                    }
+                    }
+                break;
+
+                case "Armure":
+                    for (int i = 0 ; i< arrayGameObject.Length; i++){
+                                                 arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypeArmure;
+
+                    for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().armuresList.Count; j++){
+                        if(databaseObject.GetComponent<dataBaseV3>().armuresList[j].tier<=tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().armuresList[j]);
+                        }
+
+                    }  }
+                break;
+
+                case "Potion":
+                for (int i = 0 ; i< arrayGameObject.Length; i++){
+                                             arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypePotion;
+
+                    for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().potionsList.Count; j++){
+                        if(databaseObject.GetComponent<dataBaseV3>().potionsList[j].tier<= tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().potionsList[j]);
+                        }
+                    }  
+                    
+                    
+                    }
+                break;
+
+                case "Nourriture":
+                for (int i = 0 ; i< arrayGameObject.Length; i++){
+                     for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().nourrituresList.Count; j++){
+                                                                     arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypeNourriture;
+
+                        if(databaseObject.GetComponent<dataBaseV3>().nourrituresList[j].tier<= tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().nourrituresList[j]);
+                        }
+                        
+                    }  }
+                break;
+
+                case "Minerai":
+                for (int i = 0 ; i< arrayGameObject.Length; i++){
+                     for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().mineraisList.Count; j++){
+                                                                                             arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypeMinerai;
+
+                        if(databaseObject.GetComponent<dataBaseV3>().mineraisList[j].tier<=tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().mineraisList[j]);
+                        }
+
+                    }  }
+                break;
+
+                case "Luxe":
+                for (int i = 0 ; i< arrayGameObject.Length; i++){
+                                                        arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypeLuxe;
+
+                     for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().luxesList.Count; j++){
+                        if(databaseObject.GetComponent<dataBaseV3>().luxesList[j].tier<= tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().luxesList[j]);
+                        }
+
+                    }  }
+                break;
+
+                case "Plante":
+                for (int i = 0 ; i< arrayGameObject.Length; i++){
+                                    arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypePlante;
+    
+                     for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().plantesList.Count; j++){
+                        if(databaseObject.GetComponent<dataBaseV3>().plantesList[j].tier<= tierPotentiel){
+                            arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().plantesList[j]);
+                        }
+
+                    }  }
+
+                break;
+            }
+
+        }
 }

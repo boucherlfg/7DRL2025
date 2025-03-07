@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
   m_Name: plante2
   m_EditorClassIdentifier: 
-  id: 0
+  id: 13
   itemName: 
   itemType: 5
   valeur: 2
   tier: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: 6722311997210095763, guid: f591d744bea7b444ba628096eda08c9b, type: 3}
   icon: {fileID: 0}

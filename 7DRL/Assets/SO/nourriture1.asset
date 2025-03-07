@@ -15,7 +15,7 @@ MonoBehaviour:
   id: 11
   itemName: 
   itemType: 3
-  valeur: 0
+  valeur: 2
   tier: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: 8735529523081141524, guid: cf974f2f4779d8b489771a6ae4ef233a, type: 3}
   icon: {fileID: 0}

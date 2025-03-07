@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
   m_Name: potion1
   m_EditorClassIdentifier: 
-  id: 0
+  id: 15
   itemName: 
   itemType: 2
   valeur: 2
   tier: 0
-  sprite: {fileID: 0}
+  sprite: {fileID: -1319865722905799394, guid: e59d1c2dec9ec4b4ab871c6e4cfb9209, type: 3}
   icon: {fileID: 0}

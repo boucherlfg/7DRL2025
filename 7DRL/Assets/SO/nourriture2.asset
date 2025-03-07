@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
-  m_Name: potion2
+  m_Name: nourriture2
   m_EditorClassIdentifier: 
-  id: 16
+  id: 11
   itemName: 
-  itemType: 2
+  itemType: 3
   valeur: 2
   tier: 0
-  sprite: {fileID: 3563334719634705521, guid: 345d4452ae0ae80499987bc7b363b6f9, type: 3}
+  sprite: {fileID: 8595343813505704781, guid: 36a222731bffb224fa2cfc8898b1934a, type: 3}
   icon: {fileID: 0}

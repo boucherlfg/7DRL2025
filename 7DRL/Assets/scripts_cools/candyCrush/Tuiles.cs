@@ -51,6 +51,6 @@ public class Tuiles : MonoBehaviour
             JeuAffichage.Instance.grid[pos.x, pos.y] = null;
             Destroy(tuile.gameObject);
         }
-        Debug.Log($"{tuilesASupprimer.Count} tuiles de type {type} supprimées.");
+        Debug.Log($"{tuilesASupprimer.Count} tuiles de type {type} supprimÃ©es.");
     }
 }

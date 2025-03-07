@@ -32,6 +32,7 @@ public class dataBaseV3 : MonoBehaviour
 
                 case "Potion":
                     potionsList.Add(itemsList[i]);
+ 
                 break;
 
                 case "Nourriture":
@@ -49,6 +50,9 @@ public class dataBaseV3 : MonoBehaviour
                 case "Plante":
                   plantesList.Add(itemsList[i]);
                 break;
+                default:
+                    Debug.Log("NOOOOON");
+                    break;
             }
         }
     }
