@@ -272,13 +272,13 @@ public class MapNode : MonoBehaviour
         }
 
         // Apply the road color
-        line.material = new Material(Shader.Find("Sprites/Default"));
+        line.material = new Material(Resources.Load<Material>("Materials/RoadSpriteMaterial"));
         line.startColor = roadColor;
         line.endColor = roadColor;
 
         // Set line parameters
-        line.startWidth = 0.1f;
-        line.endWidth = 0.1f;
+        line.startWidth = 0.5f;
+        line.endWidth = 0.5f;
         line.positionCount = 2;
         line.SetPosition(0, startPos);
         line.SetPosition(1, endPos);
