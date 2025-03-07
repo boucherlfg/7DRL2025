@@ -1,9 +1,9 @@
-using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor.VersionControl;
 using UnityEngine;
-using System.Collections.Generic;
+using Random = UnityEngine.Random;
+
 
 
 public class JeuAffichage : MonoBehaviour
@@ -16,31 +16,117 @@ public class JeuAffichage : MonoBehaviour
     public List<TuileType> types;
     private Vector3 positionOffset;
 
+    public bool partieCommencer = false;
+
+    public int quantiteRessourcesTotal = 0;
+    public List<Item> items = new List<Item>();
+
     private void Awake() { Instance = this; }
 
     private void Start()
     {
-        positionOffset = transform.position - new Vector3(dimension * distance / 2.0f - distance / 2, dimension * distance / 2.0f - distance / 2, 0);
-        GenererGrille();
+        RemplirQuantiter();
     }
+
+    public void Initialiser()
+    {
+        if (partieCommencer == false)
+        {
+            RemplirQuantiter();
+            positionOffset = transform.position - new Vector3(dimension * distance / 2.0f - distance / 2, dimension * distance / 2.0f - distance / 2, 0);
+            GenererGrille();
+            partieCommencer = true;
+        }
+        else
+        {
+            for(int i =0; i < dimension; i++)
+            {
+               for (int j =0; j < dimension; j++)
+                {
+                 Destroy(grid[i,j]);   
+                }
+            }
+            
+            partieCommencer = false;
+        }
+        
+}
+    
+    public void RemplirQuantiter()
+    {
+        quantiteRessourcesTotal = 0;
+        for(int i = 0; i < types.Count; i++)
+        {
+            types[i].quantite = 0;
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            for(int j = 0; j<types.Count; j++)
+            {
+                if (items[i].itemType.ToString() == types[j].itemType.ToString())
+                {
+                    types[j].quantite += items[i].valeur;
+                    quantiteRessourcesTotal += items[i].valeur;
+                }
+            }
+        }
+    }
+
 
     public void GenererGrille()
     {
+        int compteur = -1;
         grid = new GameObject[dimension, dimension];
         for (int x = 0; x < dimension; x++)
         {
             for (int y = 0; y < dimension; y++)
             {
-                CreerTuile(x, y);
+
+                //debug.Log(compteur);
+                compteur++;
+                if (compteur < quantiteRessourcesTotal)
+                {
+                  
+                    CreerTuile(x, y);
+
+                    if(quantiteRessourcesTotal - compteur < (dimension * dimension) - compteur - x*dimension)
+                    {
+
+                        int nbAleatoire = Random.Range(0, 5);
+                        if (nbAleatoire == 3)
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
             }
         }
     }
-
     public void CreerTuile(int x, int y)
     {
         GameObject newTile = Instantiate(tilePrefab);
         Tuiles tile = newTile.AddComponent<Tuiles>();
-        tile.type = types[Random.Range(0, types.Count)];
+
+        int bug = 0;
+        bool typeTrouver = false;
+        while (typeTrouver == false && bug < 100)
+        {
+            TuileType typeAleatoire = types[Random.Range(0, types.Count)];
+
+            if (typeAleatoire.quantite! > 0)
+            {
+                typeTrouver = true;
+                tile.type = typeAleatoire;
+                typeAleatoire.quantite--;
+            }
+
+        }
+        
 
         SpriteRenderer renderer = newTile.GetComponent<SpriteRenderer>();
         renderer.sprite = tile.type.sprite;
@@ -50,6 +136,9 @@ public class JeuAffichage : MonoBehaviour
 
         grid[x, y] = newTile;
     }
+
+
+
 
     public List<Tuiles> ObtenirVoisins(Tuiles tuile)
     {
