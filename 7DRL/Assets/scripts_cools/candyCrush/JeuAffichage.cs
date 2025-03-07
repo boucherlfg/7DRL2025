@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -20,6 +21,74 @@ public class JeuAffichage : MonoBehaviour
 
     public int quantiteRessourcesTotal = 0;
     public int quantiteRessourcesPlacer = 0;
+
+    public  List<Clients> clientsTotal;
+    public Queue<Clients> clientsEnAttente = new();
+    private Clients clientActuel;
+
+    public int nbClients = 5;
+    public int nbClickParClients = 5;
+
+    public GameObject clientVisuel;
+    public GameObject clientVidePrefab;
+
+
+
+
+    public void afficherClient()
+    {
+        if (clientsTotal.Count != 0 && clientVisuel != null && clientVidePrefab != null)
+        {
+            for (int i = 0; i < clientsTotal.Count; i++)
+            {
+                clientsTotal[i].nbEssais = 0;
+            }
+
+            for (int i = 0; i<nbClients; i++)
+            {
+                clientsEnAttente.Enqueue(clientsTotal[Random.Range(0,clientsTotal.Count)]);
+            }
+
+            clientActuel = clientsEnAttente.Dequeue();
+
+            GameObject visage = Instantiate(clientVidePrefab);
+            visage.transform.parent = clientVisuel.transform;
+            visage.transform.position = clientVisuel.transform.position;
+
+            visage.GetComponent<SpriteRenderer>().sprite = clientActuel.sprite;
+
+
+            GameObject itemDemande = Instantiate(tilePrefab);
+
+             itemDemande.transform.parent = clientVisuel.transform;
+             itemDemande.transform.position = new Vector3(clientVisuel.transform.position.x + 1, clientVisuel.transform.position.y,0);
+
+             itemDemande.GetComponent<SpriteRenderer>().sprite = clientActuel.itemDemander[Random.Range(0,clientActuel.itemDemander.Count)].sprite;
+
+            
+        }
+        else
+        {
+
+            Debug.LogError("AfficherClient() : y manque de quoi a remplir dans le script :PP");
+        }
+    }
+    public void recommenceClients()
+    {
+        clientsEnAttente.Clear();
+        clientActuel = null;
+        for(int i = 0; i < clientVisuel.transform.childCount; i++)
+        {
+           GameObject enfant = clientVisuel.transform.GetChild(i).gameObject;
+            Destroy(enfant);
+        }
+        for(int i = 0; i< clientsTotal.Count; i++)
+        {
+            clientsTotal[i].nbEssais = 0;
+        }
+        
+    }
+
     private void Awake() { Instance = this; }
 
     private void Start()
@@ -31,6 +100,7 @@ public class JeuAffichage : MonoBehaviour
     {
         if (partieCommencer == false)
         {
+            afficherClient();
             RemplirQuantiter();
             positionOffset = transform.position - new Vector3(dimension * distance / 2.0f - distance / 2, dimension * distance / 2.0f - distance / 2, 0);
             GenererGrille();
@@ -45,7 +115,7 @@ public class JeuAffichage : MonoBehaviour
                  Destroy(grid[i,j]);   
                 }
             }
-            
+            recommenceClients();
             partieCommencer = false;
         }
         

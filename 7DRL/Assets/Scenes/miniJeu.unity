@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &117006234
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 117006235}
+  m_Layer: 0
+  m_Name: client
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &117006235
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117006234}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7.6, y: 2.86, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &643166581
 GameObject:
   m_ObjectHideFlags: 0
@@ -478,22 +509,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6c9c859fcf45cac43a4e0fe166a87d2b, type: 2}
   partieCommencer: 0
   quantiteRessourcesTotal: 0
-  items:
-  - {fileID: 11400000, guid: eca6553a06bbac748bd0fdf53d4b3b08, type: 2}
-  - {fileID: 11400000, guid: ba2065d07009137499928413c1b14408, type: 2}
-  - {fileID: 11400000, guid: d306bf56a2546ec47a2ec6f59f2613f7, type: 2}
-  - {fileID: 11400000, guid: dded8675d063b1444bc4d170949512e9, type: 2}
-  - {fileID: 11400000, guid: e9dd169bf382c5244b4de9410eb27994, type: 2}
-  - {fileID: 11400000, guid: 3d84a1bb2b2bebc4ba7c83fb496f92b1, type: 2}
-  - {fileID: 11400000, guid: 6ab4a59c80af0a7438541adb6813a2e5, type: 2}
-  - {fileID: 11400000, guid: 2bbf1f8fb58c46149a0f329feb30873b, type: 2}
-  - {fileID: 11400000, guid: e9581dcd494358d41a02258540a152aa, type: 2}
-  - {fileID: 11400000, guid: 06deba25157c902459949bd92ba3a65b, type: 2}
-  - {fileID: 11400000, guid: 7d06220462bf099459f651222ff8b9e7, type: 2}
-  - {fileID: 11400000, guid: cc00440d2ed762e4a9b8d7bec4815a62, type: 2}
-  - {fileID: 11400000, guid: c9a440c652cd7954fa1e48c0a5edaf21, type: 2}
-  - {fileID: 11400000, guid: e989347e156c8d540b347aca20872881, type: 2}
-  - {fileID: 11400000, guid: 845b1537402147f47b65ce23ccd903b9, type: 2}
+  quantiteRessourcesPlacer: 0
+  clientsTotal:
+  - {fileID: 11400000, guid: 2c707f819369d0542b19f1309e4f7076, type: 2}
+  - {fileID: 11400000, guid: ee530ea1a1ae6d040844bc84cf62ef7c, type: 2}
+  - {fileID: 11400000, guid: c3c27ec359ba41c4b9a931d39a8e8b36, type: 2}
+  nbClients: 5
+  nbClickParClients: 5
+  clientVisuel: {fileID: 117006234}
+  clientVidePrefab: {fileID: 1606150639616605558, guid: 2bae824de90ed2e4e87d34929f9d1f73, type: 3}
 --- !u!4 &1662639113
 Transform:
   m_ObjectHideFlags: 0
@@ -682,7 +706,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -410, y: 0}
+  m_AnchoredPosition: {x: -410, y: -96.7}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1855986470
@@ -787,3 +811,4 @@ SceneRoots:
   - {fileID: 1662639113}
   - {fileID: 643166585}
   - {fileID: 1424334175}
+  - {fileID: 117006235}
