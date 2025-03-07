@@ -103,3 +103,4 @@ MonoBehaviour:
   level: 0
   position: {x: 0, y: 0, z: 0}
   connections: []
+  lineRendererRoadMaterial: {fileID: 2100000, guid: d657f5f4330395f4cb0786b0b4d1787c, type: 2}
