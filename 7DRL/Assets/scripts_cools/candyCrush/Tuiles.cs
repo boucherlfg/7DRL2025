@@ -13,7 +13,7 @@ public class Tuiles : MonoBehaviour
             SupprimerTuiles(tuilesASupprimer);
             JeuAffichage.Instance.AppliquerGravite();
             JeuAffichage.Instance.DecalerColonnes();
-            //JeuAffichage.Instance.RemplirGrille();
+            JeuAffichage.Instance.RemplirGrille();
         }
     }
 

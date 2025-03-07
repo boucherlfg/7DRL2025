@@ -19,8 +19,7 @@ public class JeuAffichage : MonoBehaviour
     public bool partieCommencer = false;
 
     public int quantiteRessourcesTotal = 0;
-    public List<Item> items = new List<Item>();
-
+    public int quantiteRessourcesPlacer = 0;
     private void Awake() { Instance = this; }
 
     private void Start()
@@ -55,7 +54,8 @@ public class JeuAffichage : MonoBehaviour
     public void RemplirQuantiter()
     {
         quantiteRessourcesTotal = 0;
-        for(int i = 0; i < types.Count; i++)
+        quantiteRessourcesPlacer = 0;
+        for (int i = 0; i < types.Count; i++)
         {
             types[i].quantite = 0;
         }
@@ -123,6 +123,7 @@ public class JeuAffichage : MonoBehaviour
                 typeTrouver = true;
                 tile.type = typeAleatoire;
                 typeAleatoire.quantite--;
+                quantiteRessourcesPlacer++;
             }
 
         }
@@ -217,9 +218,9 @@ public class JeuAffichage : MonoBehaviour
         {
             for (int y = 0; y < dimension; y++)
             {
-                if (grid[x, y] == null)
+                if (grid[x, y] == null && quantiteRessourcesTotal - quantiteRessourcesPlacer > 0)
                 {
-                    CreerTuile(x, y);
+                        CreerTuile(x, y);
                 }
             }
         }
