@@ -15,8 +15,61 @@ public class CameraController : MonoBehaviour
         mainCamera = GetComponent<Camera>();
         if (mapGenerator == null)
         {
-            mapGenerator = FindObjectOfType<MapGenerator>();
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
         }
+        
+        // Ajouter un délai pour laisser le temps à la map de se générer
+        Invoke(nameof(SetInitialZoom), 0.1f);
+    }
+
+    private void SetInitialZoom()
+    {
+        if (mapGenerator == null || mainCamera == null) return;
+
+        // Trouver les points les plus éloignés
+        Vector2 minPoint = Vector2.zero;
+        Vector2 maxPoint = Vector2.zero;
+        bool firstNode = true;
+
+        foreach (var level in mapGenerator.GetLevels())
+        {
+            foreach (var node in level.points)
+            {
+                if (node == null) continue;
+
+                Vector3 nodePos = node.transform.position;
+                if (firstNode)
+                {
+                    minPoint = maxPoint = new Vector2(nodePos.x, nodePos.y);
+                    firstNode = false;
+                }
+                else
+                {
+                    minPoint.x = Mathf.Min(minPoint.x, nodePos.x);
+                    minPoint.y = Mathf.Min(minPoint.y, nodePos.y);
+                    maxPoint.x = Mathf.Max(maxPoint.x, nodePos.x);
+                    maxPoint.y = Mathf.Max(maxPoint.y, nodePos.y);
+                }
+            }
+        }
+
+        // Ajouter une marge
+        float margin = 2f;
+        float width = (maxPoint.x - minPoint.x) + (margin * 2);
+        float height = (maxPoint.y - minPoint.y) + (margin * 2);
+
+        // Calculer le zoom nécessaire
+        float targetSize = Mathf.Max(
+            height / 2f,
+            width / (2f * mainCamera.aspect)
+        );
+
+        // Appliquer le zoom avec une marge supplémentaire de 10%
+        mainCamera.orthographicSize = Mathf.Min(maxZoom, targetSize * 1.1f);
+
+        // Centrer la caméra
+        Vector2 center = (maxPoint + minPoint) * 0.5f;
+        transform.position = new Vector3(center.x, center.y, transform.position.z);
     }
 
     private void Update()
@@ -62,21 +115,73 @@ public class CameraController : MonoBehaviour
 
     private void ClampPosition(Vector3 newPosition)
     {
-        float currentWidth = mapGenerator.mapWidth + 
-            ((mapGenerator.GetLevels().Count - 1) * MapGenerator.SIZE_INCREASE_PER_LEVEL);
-        float currentHeight = mapGenerator.mapHeight + 
-            ((mapGenerator.GetLevels().Count - 1) * MapGenerator.SIZE_INCREASE_PER_LEVEL);
+        if (mapGenerator == null || mainCamera == null) return;
 
+        // Calculer la taille visible de la caméra
         float cameraHeight = 2f * mainCamera.orthographicSize;
         float cameraWidth = cameraHeight * mainCamera.aspect;
 
-        float halfWidth = (currentWidth / 2f) - (cameraWidth / 2f);
-        float halfHeight = (currentHeight / 2f) - (cameraHeight / 2f);
+        // Trouver les points les plus éloignés sur la carte
+        Vector2 minPoint = Vector2.zero;
+        Vector2 maxPoint = Vector2.zero;
+        bool firstNode = true;
 
-        newPosition.x = Mathf.Clamp(newPosition.x, -halfWidth, halfWidth);
-        newPosition.y = Mathf.Clamp(newPosition.y, -halfHeight, halfHeight);
+        foreach (var level in mapGenerator.GetLevels())
+        {
+            foreach (var node in level.points)
+            {
+                if (node == null) continue;
+
+                Vector3 nodePos = node.transform.position;
+                if (firstNode)
+                {
+                    minPoint = maxPoint = new Vector2(nodePos.x, nodePos.y);
+                    firstNode = false;
+                }
+                else
+                {
+                    minPoint.x = Mathf.Min(minPoint.x, nodePos.x);
+                    minPoint.y = Mathf.Min(minPoint.y, nodePos.y);
+                    maxPoint.x = Mathf.Max(maxPoint.x, nodePos.x);
+                    maxPoint.y = Mathf.Max(maxPoint.y, nodePos.y);
+                }
+            }
+        }
+
+        // Ajouter une marge
+        float margin = 2f;
+        minPoint -= Vector2.one * margin;
+        maxPoint += Vector2.one * margin;
+
+        // Calculer la taille réelle de la carte
+        float currentWidth = maxPoint.x - minPoint.x;
+        float currentHeight = maxPoint.y - minPoint.y;
+        Vector2 mapCenter = (maxPoint + minPoint) * 0.5f;
+
+        // Calculer les limites effectives en tenant compte de la vue caméra
+        float maxX = (currentWidth - cameraWidth) * 0.5f;
+        float maxY = (currentHeight - cameraHeight) * 0.5f;
+
+        // Empêcher le déplacement si la caméra est plus grande que la carte
+        if (cameraWidth >= currentWidth)
+        {
+            newPosition.x = mapCenter.x;
+        }
+        else
+        {
+            newPosition.x = Mathf.Clamp(newPosition.x, mapCenter.x - maxX, mapCenter.x + maxX);
+        }
+
+        if (cameraHeight >= currentHeight)
+        {
+            newPosition.y = mapCenter.y;
+        }
+        else
+        {
+            newPosition.y = Mathf.Clamp(newPosition.y, mapCenter.y - maxY, mapCenter.y + maxY);
+        }
+
         newPosition.z = transform.position.z;
-
         transform.position = newPosition;
     }
 }
