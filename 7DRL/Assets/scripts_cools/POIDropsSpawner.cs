@@ -54,7 +54,7 @@ public class POIDropsSpawner : MonoBehaviour
 
     void Start()
     {
-        GestionRessourcesConcreteSingleton.Instance.nombreRecherchesRestantes = 5;
+        GestionRessourcesConcreteSingleton.Instance.nombreRecherchesRestantes = 200;
        // RessourcesDeFavSetup();
         //RessourcesSpawn();
       //  public GameObject[] arrayArraySpawners = new GameObject[]{arrayGameObjectSpawnersArmes, arrayGameObjectSpawnersArmures};
