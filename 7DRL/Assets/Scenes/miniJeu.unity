@@ -480,7 +480,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 94853d6d9b2b21845a8037346b856373, type: 2}
   - {fileID: 11400000, guid: 6c9c859fcf45cac43a4e0fe166a87d2b, type: 2}
   tilePrefab: {fileID: 1916675471802238532, guid: 1e8a8fdfae462eb44ab0439331c15f94, type: 3}
-  dimension: 5
+  dimension: 10
   distance: 0.5
   jeuEnCours: 0
   script: {fileID: 0}
