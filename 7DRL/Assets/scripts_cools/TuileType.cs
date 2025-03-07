@@ -7,5 +7,6 @@ public class TuileType : ScriptableObject
 
     public ItemType itemType;
     public enum ItemType { Arme, Armure, Potion, Nourriture, Minerai, Plante, Luxe };
+    public int quantite;
     public Sprite sprite;
 }
