@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -9,7 +10,10 @@ using Random = UnityEngine.Random;
 
 public class JeuAffichage : MonoBehaviour
 {
+    
     public static JeuAffichage Instance { get; private set; }
+
+    [Header("Zone de jeu")]
     public GameObject[,] grid;
     public int dimension;
     public float distance;
@@ -22,22 +26,71 @@ public class JeuAffichage : MonoBehaviour
     public int quantiteRessourcesTotal = 0;
     public int quantiteRessourcesPlacer = 0;
 
+    [Header("Gestion clients")]
+    public int nbClients = 5;
+    public Clients clientActuel;
+    public TuileType typeActuel;
     public  List<Clients> clientsTotal;
     public Queue<Clients> clientsEnAttente = new();
-    private Clients clientActuel;
-
-    public int nbClients = 5;
-    public int nbClickParClients = 5;
-
-    public GameObject clientVisuel;
+    
+    public GameObject clientWrapup;
     public GameObject clientVidePrefab;
+    public List<GameObject> typeVisuel;
+    public GameObject clientVisuel;
+
+    public int argentGagner = 0;
+    public TextMeshProUGUI textArgent;
+
+    public GameObject gameOver;
 
 
-
-
-    public void afficherClient()
+    public void PartieTerminee()
     {
-        if (clientsTotal.Count != 0 && clientVisuel != null && clientVidePrefab != null)
+
+        gameOver.SetActive(true);
+
+    }
+
+
+    public void ChoisirItemVedette()
+    {
+        if(quantiteRessourcesTotal !=0)
+        {
+            typeActuel = null;
+            for (int i = 0; i < typeVisuel.Count; i++)
+            {
+                Destroy(typeVisuel[i]);
+            }
+            typeVisuel.Clear();
+            GameObject itemDemande = Instantiate(tilePrefab);
+
+            itemDemande.transform.parent = clientWrapup.transform;
+            itemDemande.transform.position = new Vector3(clientWrapup.transform.position.x + 1, clientWrapup.transform.position.y, 0);
+
+            bool itemChoisis = false;
+
+            while (itemChoisis == false)
+            {
+                TuileType itemDemanderRandom = clientActuel.itemDemander[Random.Range(0, clientActuel.itemDemander.Count)];
+                for (int i = 0; i < types.Count; i++)
+                {
+                    if (types[i].itemType.ToString() == itemDemanderRandom.itemType.ToString() && types[i].quantiteEnJeu > 0)
+                    {
+                        itemChoisis = true;
+                        typeActuel = itemDemanderRandom;
+                    }
+                }
+            }
+
+            itemDemande.GetComponent<SpriteRenderer>().sprite = typeActuel.sprite;
+            typeVisuel.Add(itemDemande);
+        }
+    }
+
+
+    public void AfficherClient()
+    {
+        if (clientsTotal.Count != 0 && clientWrapup != null && clientVidePrefab != null)
         {
             for (int i = 0; i < clientsTotal.Count; i++)
             {
@@ -51,35 +104,54 @@ public class JeuAffichage : MonoBehaviour
 
             clientActuel = clientsEnAttente.Dequeue();
 
-            GameObject visage = Instantiate(clientVidePrefab);
-            visage.transform.parent = clientVisuel.transform;
-            visage.transform.position = clientVisuel.transform.position;
+            clientVisuel = Instantiate(clientVidePrefab);
+            clientVisuel.transform.parent = clientWrapup.transform;
+            clientVisuel.transform.position = clientWrapup.transform.position;
 
-            visage.GetComponent<SpriteRenderer>().sprite = clientActuel.sprite;
+            clientVisuel.GetComponent<SpriteRenderer>().sprite = clientActuel.sprite;
+    
+            ChoisirItemVedette();
 
-
-            GameObject itemDemande = Instantiate(tilePrefab);
-
-             itemDemande.transform.parent = clientVisuel.transform;
-             itemDemande.transform.position = new Vector3(clientVisuel.transform.position.x + 1, clientVisuel.transform.position.y,0);
-
-             itemDemande.GetComponent<SpriteRenderer>().sprite = clientActuel.itemDemander[Random.Range(0,clientActuel.itemDemander.Count)].sprite;
-
-            
         }
         else
         {
-
             Debug.LogError("AfficherClient() : y manque de quoi a remplir dans le script :PP");
         }
     }
-    public void recommenceClients()
+
+
+    public void ProchainClient()
+    {
+        if(clientsEnAttente.Count != 0)
+        {
+            clientActuel.nbEssais = 0;
+            clientActuel = clientsEnAttente.Dequeue();
+
+            clientVisuel.GetComponent<SpriteRenderer>().sprite = clientActuel.sprite;
+            ChoisirItemVedette();
+        }
+        else
+        {
+            clientVisuel.SetActive(false);
+            for (int i = 0; typeVisuel.Count > i; i++)
+            {
+                typeVisuel[i].SetActive(false);
+            }
+            clientActuel = null;
+            typeActuel = null;
+            PartieTerminee();
+        }
+       
+    }
+
+
+    public void RecommenceClients()
     {
         clientsEnAttente.Clear();
         clientActuel = null;
-        for(int i = 0; i < clientVisuel.transform.childCount; i++)
+        for(int i = 0; i < clientWrapup.transform.childCount; i++)
         {
-           GameObject enfant = clientVisuel.transform.GetChild(i).gameObject;
+           GameObject enfant = clientWrapup.transform.GetChild(i).gameObject;
             Destroy(enfant);
         }
         for(int i = 0; i< clientsTotal.Count; i++)
@@ -96,11 +168,13 @@ public class JeuAffichage : MonoBehaviour
         RemplirQuantiter();
     }
 
+
     public void Initialiser()
     {
         if (partieCommencer == false)
         {
-            afficherClient();
+            gameOver.SetActive(false);
+            AfficherClient();
             RemplirQuantiter();
             positionOffset = transform.position - new Vector3(dimension * distance / 2.0f - distance / 2, dimension * distance / 2.0f - distance / 2, 0);
             GenererGrille();
@@ -115,12 +189,13 @@ public class JeuAffichage : MonoBehaviour
                  Destroy(grid[i,j]);   
                 }
             }
-            recommenceClients();
+            RecommenceClients();
             partieCommencer = false;
         }
         
 }
     
+
     public void RemplirQuantiter()
     {
         quantiteRessourcesTotal = 0;
@@ -137,6 +212,8 @@ public class JeuAffichage : MonoBehaviour
                 if (GestionRessourcesConcreteSingleton.Instance.listSac[i].itemType.ToString() == types[j].itemType.ToString())
                 {
                     types[j].quantite += GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
+                    types[j].quantiteEnJeu += GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
+                    types[j].valeur = GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
                     quantiteRessourcesTotal += GestionRessourcesConcreteSingleton.Instance.listSac[i].valeur;
                 }
             }
@@ -177,6 +254,8 @@ public class JeuAffichage : MonoBehaviour
             }
         }
     }
+
+
     public void CreerTuile(int x, int y)
     {
         GameObject newTile = Instantiate(tilePrefab);
@@ -209,8 +288,6 @@ public class JeuAffichage : MonoBehaviour
     }
 
 
-
-
     public List<Tuiles> ObtenirVoisins(Tuiles tuile)
     {
         List<Tuiles> voisins = new List<Tuiles>();
@@ -229,6 +306,7 @@ public class JeuAffichage : MonoBehaviour
         return voisins;
     }
 
+
     public Vector2Int ObtenirPositionTuile(Tuiles tuile)
     {
         for (int x = 0; x < dimension; x++)
@@ -241,6 +319,7 @@ public class JeuAffichage : MonoBehaviour
         }
         return Vector2Int.one * -1;
     }
+
 
     public void AppliquerGravite()
     {
@@ -260,6 +339,7 @@ public class JeuAffichage : MonoBehaviour
             }
         }
     }
+
 
     public void DecalerColonnes()
     {
@@ -281,6 +361,7 @@ public class JeuAffichage : MonoBehaviour
             }
         }
     }
+
 
     public void RemplirGrille()
     {

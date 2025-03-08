@@ -12,4 +12,5 @@ public class Clients : ScriptableObject
     public List<TuileType> itemDemander;
 
     public int nbEssais = 0;
+    public int nbEssaiMax = 3;
 }

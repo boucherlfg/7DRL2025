@@ -45,12 +45,27 @@ public class Tuiles : MonoBehaviour
 
     private void SupprimerTuiles(List<Tuiles> tuilesASupprimer)
     {
-        foreach (Tuiles tuile in tuilesASupprimer)
+        JeuAffichage.Instance.clientActuel.nbEssais++;
+
+        if(JeuAffichage.Instance.clientActuel.nbEssais == JeuAffichage.Instance.clientActuel.nbEssaiMax)
         {
+            JeuAffichage.Instance.ProchainClient();
+        }
+        if (tuilesASupprimer[0].type == JeuAffichage.Instance.typeActuel)
+        {
+            int taille = tuilesASupprimer.Count;
+            
+            JeuAffichage.Instance.argentGagner += taille - 1 + taille;
+            JeuAffichage.Instance.textArgent.text = $"Argent : {JeuAffichage.Instance.argentGagner.ToString()}$";
+            
+        }
+        foreach (Tuiles tuile in tuilesASupprimer)
+        { 
             Vector2Int pos = JeuAffichage.Instance.ObtenirPositionTuile(tuile);
             JeuAffichage.Instance.grid[pos.x, pos.y] = null;
+            tuile.type.quantiteEnJeu -= tuile.type.valeur;
             Destroy(tuile.gameObject);
         }
-        Debug.Log($"{tuilesASupprimer.Count} tuiles de type {type} supprimées.");
+        //Debug.Log($"{tuilesASupprimer.Count} tuiles de type {type} supprimées.");
     }
 }
