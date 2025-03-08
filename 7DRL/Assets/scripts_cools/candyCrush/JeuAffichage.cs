@@ -46,7 +46,7 @@ public class JeuAffichage : MonoBehaviour
 
     public void PartieTerminee()
     {
-
+        partieCommencer = false;
         gameOver.SetActive(true);
 
     }
@@ -65,7 +65,7 @@ public class JeuAffichage : MonoBehaviour
             GameObject itemDemande = Instantiate(tilePrefab);
 
             itemDemande.transform.parent = clientWrapup.transform;
-            itemDemande.transform.position = new Vector3(clientWrapup.transform.position.x + 1, clientWrapup.transform.position.y, 0);
+            itemDemande.transform.position = new Vector3(clientWrapup.transform.position.x, clientWrapup.transform.position.y - 1, -2);
 
             bool itemChoisis = false;
 
