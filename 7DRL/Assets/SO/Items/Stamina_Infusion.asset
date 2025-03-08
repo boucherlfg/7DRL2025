@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
   m_Name: Stamina_Infusion
   m_EditorClassIdentifier: 
-  id: 0
+  id: 54
   itemName: Stamina Infusion
   itemType: 2
   valeur: 6
   tier: 2
-  sprite: {fileID: 0}
-  icon: {fileID: 0}
+  sprite: {fileID: 4051853549349518899, guid: 60e74be7d0aa9ee498cd585ffde7dfcf, type: 3}
+  icon: {fileID: 4051853549349518899, guid: 60e74be7d0aa9ee498cd585ffde7dfcf, type: 3}
