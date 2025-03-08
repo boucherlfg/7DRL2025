@@ -47,7 +47,7 @@ public class POIDropsSpawner : MonoBehaviour
 
 
 
-    public int tierPotentiel;
+    private int tierPotentiel;
     public GameObject[] spawnPoints;
     public GameObject ressourcesSpawner;
     public enum ItemType{Arme, Armure, Potion, Nourriture, Minerai, Plante, Luxe};
@@ -183,14 +183,16 @@ public class POIDropsSpawner : MonoBehaviour
 
 }
         public void AjoutRessources(GameObject[] arrayGameObject,string leType ){
+        tierPotentiel = GestionRessourcesConcreteSingleton.Instance.tierActuel;
 
             for (int k = 0; k< arrayGameObject.Length; k++){
                 arrayGameObject[k].GetComponent<POIDrops>().itemImage = this.itemImage;
                 arrayGameObject[k].GetComponent<POIDrops>().itemTypeImage = this.itemTypeImage;
                 arrayGameObject[k].GetComponent<POIDrops>().itemName = this.itemName;
                 arrayGameObject[k].GetComponent<POIDrops>().itemValue = this.itemValue;
-                Debug.Log("yippie");
             }
+                            Debug.Log(leType);
+
 switch (leType)
             {
                  case "Arme":
@@ -269,12 +271,16 @@ switch (leType)
                 break;
 
                 case "Plante":
+                Debug.Log(databaseObject.GetComponent<dataBaseV3>().plantesList.Count + " plante list count");
+                Debug.Log(tierPotentiel + " tier potentiel");
                 for (int i = 0 ; i< arrayGameObject.Length; i++){
                                     arrayGameObject[i].GetComponent<POIDrops>().spriteUI = spriteTypePlante;
     
                      for(int j = 0 ; j < databaseObject.GetComponent<dataBaseV3>().plantesList.Count; j++){
                         if(databaseObject.GetComponent<dataBaseV3>().plantesList[j].tier<= tierPotentiel){
+
                             arrayGameObject[i].GetComponent<POIDrops>().dropsPossibles.Add(databaseObject.GetComponent<dataBaseV3>().plantesList[j]);
+                      Debug.Log( databaseObject.GetComponent<dataBaseV3>().plantesList[j] + " liste plante");
                         }
 
                     }  }
