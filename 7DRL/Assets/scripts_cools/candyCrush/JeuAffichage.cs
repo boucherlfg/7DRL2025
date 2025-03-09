@@ -31,6 +31,7 @@ public class JeuAffichage : MonoBehaviour
     public TuileType typeActuel;
     public  List<Clients> clientsTotal;
     public Queue<Clients> clientsEnAttente = new();
+    public GameObject jeu;
     
     public GameObject clientWrapup;
     public GameObject clientVidePrefab;
@@ -47,6 +48,7 @@ public class JeuAffichage : MonoBehaviour
     {
         partieCommencer = false;
         gameOver.SetActive(true);
+        jeu.SetActive(false);
 
     }
 
@@ -165,6 +167,7 @@ public class JeuAffichage : MonoBehaviour
     private void Start()
     {
         RemplirQuantiter();
+        Initialiser();
     }
 
 
