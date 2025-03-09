@@ -17,9 +17,12 @@ public class MapNode : MonoBehaviour
     private Vector3 originalScale;
     private NodeType nodeType;
     private bool isPlayerHere = false;
+    private bool _canMove = true;
 
     private void Start()
     {
+        Entered.AddListener(OnNodeEntered);
+        Exited.AddListener(OnNodeExited);
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalScale = transform.localScale;
         
@@ -31,12 +34,21 @@ public class MapNode : MonoBehaviour
         
         UpdateSpriteVisibility();
         AssignRandomNodeType();
-        //UpdateNodeConnections();
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddMapNode(this);
         }
+    }
+
+    private void OnNodeExited()
+    {
+        _canMove = true;
+    }
+
+    private void OnNodeEntered(NodeType arg0)
+    {
+        _canMove = false;
     }
 
     public void OnPlayerEnter()
@@ -292,7 +304,7 @@ public class MapNode : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (EventSystem.current.IsPointerOverGameObject()) return;
+        if (!_canMove) return;
         
         Debug.Log($"MapNode of type {nodeType} clicked!");
         var player = FindFirstObjectByType<PlayerController>();

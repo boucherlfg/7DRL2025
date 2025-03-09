@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using UnityEngine.SceneManagement;
+
 public class GameManager : MonoBehaviour
 {
     public int argentGagner = 0;
@@ -10,6 +12,10 @@ public class GameManager : MonoBehaviour
     public Sprite citySprite;
     public Sprite farmSprite;
     public Sprite dungeonSprite;
+
+    public int initialMoneyForLevel = 30;
+    public int daysToPay = 15;
+    private int _currentMoneyForLevel;
     public static GameManager Instance { get; private set; }
     public Dictionary<Vector3, NodeType> MapNodesDict { get; private set; }
     public Dictionary<(Vector3, Vector3), Color> MapLinksDict { get; private set; }
@@ -33,10 +39,10 @@ public class GameManager : MonoBehaviour
             return;
         }
         
+        _currentMoneyForLevel = initialMoneyForLevel;
         Instance = this;
         MapNode.Entered.AddListener(OnMapNodeEntered);
         MapNode.Exited.AddListener(OnMapNodeExited);
-        DontDestroyOnLoad(gameObject);
         InitializeGameManager();
     }
 
@@ -94,28 +100,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool IsNodeSaved(MapNode node)
-    {
-        return MapNodesDict.ContainsKey(node.position);
-    }
-
-    public NodeType GetNodeType(Vector3 position)
-    {
-        if (MapNodesDict.ContainsKey(position))
-        {
-            return MapNodesDict[position];
-        }
-
-        return NodeType.Farm; //NodeType.Ruins;
-    }
-
-    private bool IsColorSimilar(Color a, Color b, float tolerance = 0.1f)
-    {
-        return Mathf.Abs(a.r - b.r) < tolerance &&
-               Mathf.Abs(a.g - b.g) < tolerance &&
-               Mathf.Abs(a.b - b.b) < tolerance;
-    }
-
     private string ColorToString(Color color)
     {
         return $"R:{color.r:F3}, G:{color.g:F3}, B:{color.b:F3}";
@@ -168,6 +152,18 @@ public class GameManager : MonoBehaviour
         return MapLinksDict;
     }
 
+    public bool CanContinuePlaying()
+    {
+        if (argentGagner < _currentMoneyForLevel)
+        {
+            SceneManager.LoadScene($"lose");
+            return false;
+        }
+        
+        argentGagner -= _currentMoneyForLevel;
+        _currentMoneyForLevel += initialMoneyForLevel;
+        return true;
+    }
     internal void UpdateMapNode(MapNode mapNode)
     {
         //retrouver le node dans la liste grace à la position et mettre à jour le type
@@ -203,8 +199,10 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Points added: +{points}, Total Jour: {Player.Jour}, Level : {Player.Level}" );
 
         // Vérifier si nous devons augmenter le niveau
-        if (Player.Jour >= Player.Level * 30)
+        if (Player.Jour >= Player.Level * daysToPay)
         {
+            if(!CanContinuePlaying()) return;
+
             Player.Level++;
             Debug.Log($"Level increased to {Player.Level}");
             
@@ -256,9 +254,12 @@ public class GameManager : MonoBehaviour
         scoreBackgroundTexture.SetPixel(0, 0, new Color(0, 0, 0, 0.7f));
         scoreBackgroundTexture.Apply();
         
-        GUI.DrawTexture(new Rect(padding, padding, legendWidth * 0.5f, elementHeight * 1.5f), scoreBackgroundTexture);
+        GUI.DrawTexture(new Rect(padding, padding, legendWidth * 0.5f, elementHeight * 2.5f), scoreBackgroundTexture);
         GUI.Label(new Rect(padding, padding, legendWidth * 0.5f, elementHeight), 
             $"Jour: {Player.Jour}", titleStyle);
+        GUI.Label(new Rect(padding, padding + elementHeight, legendWidth * 0.5f, elementHeight), 
+            $"Argent: {argentGagner}", titleStyle);
+
 
         // Position de la légende (à droite) - avec le fond plus transparent
         float rightPadding = Screen.width - legendWidth - padding;

@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     
     private void Start()
     {
-        mainCamera = GetComponent<Camera>();
+        mainCamera = Camera.main;
         if (mapGenerator == null)
         {
             mapGenerator = FindFirstObjectByType<MapGenerator>();
@@ -108,7 +108,7 @@ public class CameraController : MonoBehaviour
         if (movement.magnitude > 0)
         {
             movement.Normalize();
-            Vector3 newPosition = transform.position + movement * (moveSpeed * Time.deltaTime);
+            Vector3 newPosition = mainCamera.transform.position + movement * (moveSpeed * Time.deltaTime);
             
             ClampPosition(newPosition);
         }
@@ -196,6 +196,6 @@ public class CameraController : MonoBehaviour
         }
 
         newPosition.z = transform.position.z;
-        transform.position = newPosition;
+        mainCamera.transform.position = newPosition;
     }
 }
