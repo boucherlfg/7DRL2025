@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b44c1c48d053ad40afeb6c84371fc90, type: 3}
+  m_Name: chevalier
+  m_EditorClassIdentifier: 
+  clienType: 1
+  sprite: {fileID: -2997497022952476964, guid: 19f977e6a58f3c24e8bca6ee63f5e2a1, type: 3}
+  itemDemander:
+  - {fileID: 11400000, guid: 8a6174cfdc714944992527256358269b, type: 2}
+  - {fileID: 11400000, guid: f2f1b3ec35553874b98a7f302a087084, type: 2}
+  - {fileID: 11400000, guid: 6c9c859fcf45cac43a4e0fe166a87d2b, type: 2}
+  nbEssais: 3
+  nbEssaiMax: 3

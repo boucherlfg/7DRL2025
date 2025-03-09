@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b44c1c48d053ad40afeb6c84371fc90, type: 3}
+  m_Name: villageois
+  m_EditorClassIdentifier: 
+  clienType: 0
+  sprite: {fileID: 2198177182241153000, guid: 141e4e94b86181f408cf890cc8624dfb, type: 3}
+  itemDemander:
+  - {fileID: 11400000, guid: 65089d7cd62ec8c4ba3a4203070b92fa, type: 2}
+  - {fileID: 11400000, guid: 94853d6d9b2b21845a8037346b856373, type: 2}
+  - {fileID: 11400000, guid: 76ec0c8ae42e42240825ec9b9daeed3c, type: 2}
+  - {fileID: 11400000, guid: 6c9c859fcf45cac43a4e0fe166a87d2b, type: 2}
+  nbEssais: 0
+  nbEssaiMax: 3

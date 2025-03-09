@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c1a6a388f63740459544ecf728aebc5, type: 3}
+  m_Name: plante1
+  m_EditorClassIdentifier: 
+  id: 12
+  itemName: 
+  itemType: 5
+  valeur: 2
+  tier: 0
+  sprite: {fileID: 3031437423070101909, guid: fbc7d8f5563dcbd44b11a60b5b64913a, type: 3}
+  icon: {fileID: 0}
