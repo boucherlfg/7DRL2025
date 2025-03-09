@@ -4,6 +4,7 @@ using System.Linq;
 
 public class PlayerController : MonoBehaviour
 {
+    private bool _canControl = true;
     public float moveSpeed = 5f;
     private Vector3 targetPosition;
     private bool isMoving = false;
@@ -13,8 +14,20 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        
+        MapNode.Entered.AddListener(OnMapNodeEntered);
+        MapNode.Exited.AddListener(OnMapNodeExited);
     }
 
+    private void OnMapNodeExited()
+    {
+        _canControl = true;
+    }
+
+    private void OnMapNodeEntered(NodeType arg0)
+    {
+        _canControl = false;
+    }
     private IEnumerator MoveAlongPath(MapNode targetNode)
     {
         if (targetNode == null || targetNode.transform == null) yield break;

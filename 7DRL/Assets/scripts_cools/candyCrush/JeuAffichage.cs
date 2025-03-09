@@ -6,7 +6,6 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 
-
 public class JeuAffichage : MonoBehaviour
 {
     
@@ -38,7 +37,6 @@ public class JeuAffichage : MonoBehaviour
     public List<GameObject> typeVisuel;
     public GameObject clientVisuel;
 
-    public int argentGagner = 0;
     public TextMeshProUGUI textArgent;
 
     public GameObject gameOver;
@@ -49,7 +47,6 @@ public class JeuAffichage : MonoBehaviour
         partieCommencer = false;
         gameOver.SetActive(true);
         jeu.SetActive(false);
-
     }
 
 
@@ -189,6 +186,7 @@ public class JeuAffichage : MonoBehaviour
     {
         if (partieCommencer == false)
         {
+            textArgent.text = $"{GameManager.Instance.argentGagner.ToString()}g";
             gameOver.SetActive(false);
             AfficherClient();
             RemplirQuantiter();

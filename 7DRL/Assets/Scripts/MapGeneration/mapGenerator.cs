@@ -105,11 +105,6 @@ public class MapGenerator : MonoBehaviour
             newNode.level = 1;
             newNodes.Add(newNode);
             allNodes.Add(newNode);
-
-            // if (GameManager.Instance != null)
-            // {
-            //     GameManager.Instance.AddMapNode(newNode);
-            // }
         }
 
         // Connect the new nodes

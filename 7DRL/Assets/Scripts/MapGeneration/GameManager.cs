@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 public class GameManager : MonoBehaviour
 {
+    public int argentGagner = 0;
+    public bool IsInsidePOI { get; private set; } = false;
     public Sprite ruinsSprite;
     public Sprite citySprite;
     public Sprite farmSprite;
@@ -32,10 +34,21 @@ public class GameManager : MonoBehaviour
         }
         
         Instance = this;
+        MapNode.Entered.AddListener(OnMapNodeEntered);
+        MapNode.Exited.AddListener(OnMapNodeExited);
         DontDestroyOnLoad(gameObject);
         InitializeGameManager();
     }
 
+    private void OnMapNodeEntered(NodeType nodeType)
+    {
+        IsInsidePOI = true;
+    }
+
+    private void OnMapNodeExited()
+    {
+        IsInsidePOI = false;
+    }
     public void SpawnPlayer(MapNode startNode)
     {
         if (startNode == null)
@@ -92,7 +105,8 @@ public class GameManager : MonoBehaviour
         {
             return MapNodesDict[position];
         }
-        return NodeType.Ruins;
+
+        return NodeType.Farm; //NodeType.Ruins;
     }
 
     private bool IsColorSimilar(Color a, Color b, float tolerance = 0.1f)
@@ -205,6 +219,7 @@ public class GameManager : MonoBehaviour
 
     private void OnGUI()
     {
+        if (IsInsidePOI) return;
         if (Player == null) return;
 
         // Créer une texture pour le fond
@@ -273,7 +288,7 @@ public class GameManager : MonoBehaviour
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 citySprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
-                "Ville - Centre habité", textStyle);
+                "Ville - Vendre et acheter", textStyle);
         }
         currentY += elementHeight;
 
@@ -282,18 +297,18 @@ public class GameManager : MonoBehaviour
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 farmSprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
-                "Ferme - Zone agricole", textStyle);
+                "Ferme - Récolter des ressources", textStyle);
         }
         currentY += elementHeight;
 
-        if (dungeonSprite != null)
+        /*if (dungeonSprite != null)
         {
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 dungeonSprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
                 "Donjon - Zone dangereuse", textStyle);
         }
-        currentY += elementHeight * 1.5f;
+        currentY += elementHeight * 1.5f;*/
 
         // Section Routes
         GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 

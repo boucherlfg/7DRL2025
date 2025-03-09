@@ -4,6 +4,7 @@ public class ChangeScene : MonoBehaviour
 {
   public void changeScene(){
 
-      SceneManager.LoadScene("miniJeu");
+      SceneManager.UnloadSceneAsync(gameObject.scene);
+      MapNode.Exited.Invoke();
   }
 }
