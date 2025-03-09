@@ -1,10 +1,15 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using Random = UnityEngine.Random;
 
 public class MapNode : MonoBehaviour
 {
+    public static UnityEvent<NodeType> Entered = new();
+    public static UnityEvent Exited = new();
+    
     public int level;
     public Vector3 position;
     public List<MapNode> connections = new List<MapNode>();
@@ -12,9 +17,12 @@ public class MapNode : MonoBehaviour
     private Vector3 originalScale;
     private NodeType nodeType;
     private bool isPlayerHere = false;
+    private bool _canMove = true;
 
     private void Start()
     {
+        Entered.AddListener(OnNodeEntered);
+        Exited.AddListener(OnNodeExited);
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalScale = transform.localScale;
         
@@ -26,7 +34,6 @@ public class MapNode : MonoBehaviour
         
         UpdateSpriteVisibility();
         AssignRandomNodeType();
-        //UpdateNodeConnections();
 
         if (GameManager.Instance != null)
         {
@@ -34,9 +41,20 @@ public class MapNode : MonoBehaviour
         }
     }
 
+    private void OnNodeExited()
+    {
+        _canMove = true;
+    }
+
+    private void OnNodeEntered(NodeType arg0)
+    {
+        _canMove = false;
+    }
+
     public void OnPlayerEnter()
     {
         isPlayerHere = true;
+        PoiSceneSwitcher.Instance.SwitchScenes(nodeType);
         UpdateSpriteVisibility();
     }
 
@@ -56,17 +74,9 @@ public class MapNode : MonoBehaviour
 
     private void AssignRandomNodeType()
     {
-        if(GameManager.Instance.IsNodeSaved(this))
-        {
-            nodeType = GameManager.Instance.GetNodeType(this.position);
-            UpdateNodeSprite();
-            return;
-        }
-        else
-        {
-            nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
-            UpdateNodeSprite();
-        }
+        nodeType = (NodeType)Random.Range(0, System.Enum.GetValues(typeof(NodeType)).Length);
+        UpdateNodeSprite();
+        
         if (GameManager.Instance != null)
         {
             GameManager.Instance.UpdateMapNode(this);
@@ -86,7 +96,7 @@ public class MapNode : MonoBehaviour
             NodeType.Ruins => (mapGen.ruinsSprite, new Color(1f, 0.2f, 0.2f, 1f)),    // Rouge plus vif
             NodeType.City => (mapGen.citySprite, new Color(0.2f, 0.2f, 1f, 1f)),      // Bleu plus vif
             NodeType.Farm => (mapGen.farmSprite, new Color(0.2f, 1f, 0.2f, 1f)),      // Vert plus vif
-            NodeType.Dungeon => (mapGen.dungeonSprite, new Color(0.8f, 0.2f, 0.8f, 1f)), // Violet plus vif
+            //NodeType.Dungeon => (mapGen.dungeonSprite, new Color(0.8f, 0.2f, 0.8f, 1f)), // Violet plus vif
             _ => (mapGen.ruinsSprite, Color.white)  // Default case handles all remaining values
         };
 
@@ -95,24 +105,6 @@ public class MapNode : MonoBehaviour
                 
         transform.localScale = new Vector3(1f, 1f, 1f);
     }
-
-    // private void UpdateNodeColor()
-    // {
-    //     if (spriteRenderer == null) return;
-    //     spriteRenderer.color = GetColorForNodeType(nodeType);
-    // }
-
-    // private Color GetColorForNodeType(NodeType type)
-    // {
-    //     return type switch
-    //     {
-    //         NodeType.Ruins => new Color(0.7f, 0.0f, 0.0f, 1f),    // Rouge foncé
-    //         NodeType.City => new Color(0.0f, 0.0f, 0.7f, 1f),     // Bleu foncé
-    //         NodeType.Farm => new Color(0.0f, 0.7f, 0.0f, 1f),     // Vert foncé
-    //         NodeType.Dungeon => new Color(0.5f, 0.0f, 0.5f, 1f),  // Violet
-    //         _ => Color.black
-    //     };
-    // }
 
     public void ConnectTo(MapNode otherNode)
     {
@@ -312,6 +304,8 @@ public class MapNode : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (!_canMove) return;
+        
         Debug.Log($"MapNode of type {nodeType} clicked!");
         var player = FindFirstObjectByType<PlayerController>();
         if (player != null)

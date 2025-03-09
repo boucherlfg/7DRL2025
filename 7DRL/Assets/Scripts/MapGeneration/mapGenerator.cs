@@ -46,14 +46,9 @@ public class MapGenerator : MonoBehaviour
         else
         {
             InitializeMap();
-            DontDestroyOnLoad(gameObject);
         }
     }
 
-    public void Awake()
-    {
-        DontDestroyOnLoad(gameObject);
-    }
     private bool ValidateComponents()
     {
         if (nodePrefab == null || linePrefab == null)
@@ -105,11 +100,6 @@ public class MapGenerator : MonoBehaviour
             newNode.level = 1;
             newNodes.Add(newNode);
             allNodes.Add(newNode);
-
-            // if (GameManager.Instance != null)
-            // {
-            //     GameManager.Instance.AddMapNode(newNode);
-            // }
         }
 
         // Connect the new nodes
@@ -199,59 +189,42 @@ public class MapGenerator : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && currentLevel < maxLevels)
+        if (!Input.GetKeyDown(KeyCode.Space) || currentLevel >= maxLevels) return;
+
+        if (currentLevel - 1 >= levels.Count) return;
+        var currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+        var currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
+
+        // Collect all existing nodes
+        var allNodes = new List<MapNode>();
+        foreach (var level in levels)
         {
-            if (currentLevel - 1 < levels.Count)
-            {
-                var currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
-                var currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
-
-                // Collect all existing nodes
-                var allNodes = new List<MapNode>();
-                foreach (var level in levels)
-                {
-                    allNodes.AddRange(level.points);
-                }
-
-                // Create new level with 10 points
-                var newLevel = new MapLevel(10, currentWidth, currentHeight);
-                var newNodes = new List<MapNode>();
-
-                // Generate 10 new points with optimal positions
-                for (var i = 0; i < 10; i++)
-                {
-                    var newPosition = FindOptimalPosition(allNodes, currentWidth, currentHeight);
-                    var newNode = CreatePointNode(newPosition);
-                    newNode.level = currentLevel + 1;
-                    newNodes.Add(newNode);
-                    allNodes.Add(newNode);
-
-                    // if (GameManager.Instance != null)
-                    // {
-                    //     GameManager.Instance.AddMapNode(newNode);
-                    // }
-                }
-
-                // Connect the new nodes
-                ConnectNewNodes(newNodes, allNodes.Except(newNodes).ToList());
-
-                // Add to level after connections are made
-                newLevel.points.AddRange(newNodes);
-                levels.Add(newLevel);
-
-                currentLevel++;
-                UpdateVisibility();
-            }
+            allNodes.AddRange(level.points);
         }
-        if (Input.GetKeyDown(KeyCode.R))
+
+        // Create new level with 10 points
+        var newLevel = new MapLevel(10, currentWidth, currentHeight);
+        var newNodes = new List<MapNode>();
+
+        // Generate 10 new points with optimal positions
+        for (var i = 0; i < 10; i++)
         {
-            HardResetMap();
+            var newPosition = FindOptimalPosition(allNodes, currentWidth, currentHeight);
+            var newNode = CreatePointNode(newPosition);
+            newNode.level = currentLevel + 1;
+            newNodes.Add(newNode);
+            allNodes.Add(newNode);
         }
-        if(Input.GetKeyDown(KeyCode.J)){ //passer a la scène du jeu
-            Scene currentScene = SceneManager.GetActiveScene();
 
-            SceneManager.LoadScene(currentScene.name);
-        }
+        // Connect the new nodes
+        ConnectNewNodes(newNodes, allNodes.Except(newNodes).ToList());
+
+        // Add to level after connections are made
+        newLevel.points.AddRange(newNodes);
+        levels.Add(newLevel);
+
+        currentLevel++;
+        UpdateVisibility();
     }
 
    private void HardResetMap()
@@ -471,7 +444,7 @@ public class MapGenerator : MonoBehaviour
     public void GenerateNewLevel()
     {
         if (currentLevel >= maxLevels) return;
-
+        
         var currentWidth = mapWidth + (currentLevel * SIZE_INCREASE_PER_LEVEL);
         var currentHeight = mapHeight + (currentLevel * SIZE_INCREASE_PER_LEVEL);
 

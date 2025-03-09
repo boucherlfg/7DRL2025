@@ -2,12 +2,20 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using UnityEngine.SceneManagement;
+
 public class GameManager : MonoBehaviour
 {
+    public int argentGagner = 0;
+    public bool IsInsidePOI { get; private set; } = false;
     public Sprite ruinsSprite;
     public Sprite citySprite;
     public Sprite farmSprite;
     public Sprite dungeonSprite;
+
+    public int initialMoneyForLevel = 30;
+    public int daysToPay = 15;
+    private int _currentMoneyForLevel;
     public static GameManager Instance { get; private set; }
     public Dictionary<Vector3, NodeType> MapNodesDict { get; private set; }
     public Dictionary<(Vector3, Vector3), Color> MapLinksDict { get; private set; }
@@ -31,11 +39,22 @@ public class GameManager : MonoBehaviour
             return;
         }
         
+        _currentMoneyForLevel = initialMoneyForLevel;
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        MapNode.Entered.AddListener(OnMapNodeEntered);
+        MapNode.Exited.AddListener(OnMapNodeExited);
         InitializeGameManager();
     }
 
+    private void OnMapNodeEntered(NodeType nodeType)
+    {
+        IsInsidePOI = true;
+    }
+
+    private void OnMapNodeExited()
+    {
+        IsInsidePOI = false;
+    }
     public void SpawnPlayer(MapNode startNode)
     {
         if (startNode == null)
@@ -79,27 +98,6 @@ public class GameManager : MonoBehaviour
         if(!MapNodesDict.ContainsKey(node.position)){
                 MapNodesDict.Add(node.position, node.GetNodeType());
         }
-    }
-
-    public bool IsNodeSaved(MapNode node)
-    {
-        return MapNodesDict.ContainsKey(node.position);
-    }
-
-    public NodeType GetNodeType(Vector3 position)
-    {
-        if (MapNodesDict.ContainsKey(position))
-        {
-            return MapNodesDict[position];
-        }
-        return NodeType.Ruins;
-    }
-
-    private bool IsColorSimilar(Color a, Color b, float tolerance = 0.1f)
-    {
-        return Mathf.Abs(a.r - b.r) < tolerance &&
-               Mathf.Abs(a.g - b.g) < tolerance &&
-               Mathf.Abs(a.b - b.b) < tolerance;
     }
 
     private string ColorToString(Color color)
@@ -154,6 +152,18 @@ public class GameManager : MonoBehaviour
         return MapLinksDict;
     }
 
+    public bool CanContinuePlaying()
+    {
+        if (argentGagner < _currentMoneyForLevel)
+        {
+            SceneManager.LoadScene($"lose");
+            return false;
+        }
+        
+        argentGagner -= _currentMoneyForLevel;
+        _currentMoneyForLevel += initialMoneyForLevel;
+        return true;
+    }
     internal void UpdateMapNode(MapNode mapNode)
     {
         //retrouver le node dans la liste grace à la position et mettre à jour le type
@@ -189,8 +199,10 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Points added: +{points}, Total Jour: {Player.Jour}, Level : {Player.Level}" );
 
         // Vérifier si nous devons augmenter le niveau
-        if (Player.Jour >= Player.Level * 30)
+        if (Player.Jour >= Player.Level * daysToPay)
         {
+            if(!CanContinuePlaying()) return;
+
             Player.Level++;
             Debug.Log($"Level increased to {Player.Level}");
             
@@ -205,6 +217,7 @@ public class GameManager : MonoBehaviour
 
     private void OnGUI()
     {
+        if (IsInsidePOI) return;
         if (Player == null) return;
 
         // Créer une texture pour le fond
@@ -241,9 +254,12 @@ public class GameManager : MonoBehaviour
         scoreBackgroundTexture.SetPixel(0, 0, new Color(0, 0, 0, 0.7f));
         scoreBackgroundTexture.Apply();
         
-        GUI.DrawTexture(new Rect(padding, padding, legendWidth * 0.5f, elementHeight * 1.5f), scoreBackgroundTexture);
+        GUI.DrawTexture(new Rect(padding, padding, legendWidth * 0.5f, elementHeight * 2.5f), scoreBackgroundTexture);
         GUI.Label(new Rect(padding, padding, legendWidth * 0.5f, elementHeight), 
             $"Jour: {Player.Jour}", titleStyle);
+        GUI.Label(new Rect(padding, padding + elementHeight, legendWidth * 0.5f, elementHeight), 
+            $"Argent: {argentGagner}", titleStyle);
+
 
         // Position de la légende (à droite) - avec le fond plus transparent
         float rightPadding = Screen.width - legendWidth - padding;
@@ -273,7 +289,7 @@ public class GameManager : MonoBehaviour
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 citySprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
-                "Ville - Centre habité", textStyle);
+                "Ville - Vendre et acheter", textStyle);
         }
         currentY += elementHeight;
 
@@ -282,18 +298,18 @@ public class GameManager : MonoBehaviour
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 farmSprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
-                "Ferme - Zone agricole", textStyle);
+                "Ferme - Récolter des ressources", textStyle);
         }
         currentY += elementHeight;
 
-        if (dungeonSprite != null)
+        /*if (dungeonSprite != null)
         {
             GUI.DrawTexture(new Rect(rightPadding + iconPadding, currentY + 2f, iconSize, iconSize), 
                 dungeonSprite.texture);
             GUI.Label(new Rect(rightPadding + iconSize + iconPadding * 2, currentY, legendWidth - iconSize, elementHeight), 
                 "Donjon - Zone dangereuse", textStyle);
         }
-        currentY += elementHeight * 1.5f;
+        currentY += elementHeight * 1.5f;*/
 
         // Section Routes
         GUI.Label(new Rect(rightPadding, currentY, legendWidth, elementHeight), 

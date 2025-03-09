@@ -7,8 +7,9 @@ public class MapTransition : MonoBehaviour
     public MapGenerator mapGenerator;
     public float distanceFromExistingPoints;
     public float minDistanceBetweenPoints;
-    private const int POINTS_PER_LEVEL = 10;
-    private const int MAX_CONNECTIONS = 4;
+    [SerializeField]private int pointsPerLevel = 10;
+    [SerializeField]private int priceForTransitionning = 30;
+    [SerializeField]private int maxConnections = 4;
 
     private float currentWidth;
     private float currentHeight;
@@ -24,12 +25,12 @@ public class MapTransition : MonoBehaviour
         // Calculate points to add for this level
         
         // Create new level with the additional points
-        var newLevel = new MapLevel(POINTS_PER_LEVEL, currentWidth, currentHeight);
+        var newLevel = new MapLevel(pointsPerLevel, currentWidth, currentHeight);
         mapGenerator.AddLevel(newLevel);
 
         // Distribute points among edge nodes
-        var pointsPerNode = POINTS_PER_LEVEL / edgeNodes.Count;
-        var remainingPoints = POINTS_PER_LEVEL % edgeNodes.Count;
+        var pointsPerNode = pointsPerLevel / edgeNodes.Count;
+        var remainingPoints = pointsPerLevel % edgeNodes.Count;
 
         foreach (var edgeNode in edgeNodes)
         {
@@ -205,7 +206,7 @@ public class MapTransition : MonoBehaviour
         {
             var potentialConnections = connectedNodes
                 .Where(n => n != node && 
-                    n.connections.Count < MAX_CONNECTIONS && 
+                    n.connections.Count < maxConnections && 
                     !node.connections.Contains(n))
                 .OrderBy(n => Vector3.Distance(n.transform.position, node.transform.position))
                 .Take(2);
@@ -219,8 +220,8 @@ public class MapTransition : MonoBehaviour
 
     private void ConnectNewNodeToEdge(MapNode sourceNode, MapNode targetNode)
     {
-        if (sourceNode.connections.Count < MAX_CONNECTIONS && 
-            targetNode.connections.Count < MAX_CONNECTIONS)
+        if (sourceNode.connections.Count < maxConnections && 
+            targetNode.connections.Count < maxConnections)
         {
             // Create one-way connection to avoid double connections
             sourceNode.ConnectTo(targetNode);

@@ -7,12 +7,12 @@ public class CameraController : MonoBehaviour
     public float minZoom = 2f;
     public float maxZoom = 15f;
     public MapGenerator mapGenerator;
-    
+    private bool _canControl = true;
     private Camera mainCamera;
     
     private void Start()
     {
-        mainCamera = GetComponent<Camera>();
+        mainCamera = Camera.main;
         if (mapGenerator == null)
         {
             mapGenerator = FindFirstObjectByType<MapGenerator>();
@@ -20,6 +20,19 @@ public class CameraController : MonoBehaviour
         
         // Ajouter un délai pour laisser le temps à la map de se générer
         Invoke(nameof(SetInitialZoom), 0.1f);
+        MapNode.Entered.AddListener(OnMapNodeEntered);
+        MapNode.Exited.AddListener(OnMapNodeExited);
+    }
+
+    private void OnMapNodeExited()
+    {
+        Invoke(nameof(SetInitialZoom), 0.1f);
+        _canControl = true;
+    }
+
+    private void OnMapNodeEntered(NodeType arg0)
+    {
+        _canControl = false;
     }
 
     private void SetInitialZoom()
@@ -74,6 +87,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        //if(!_canControl) return;
         HandleMovement();
         HandleZoom();
     }
@@ -94,7 +108,7 @@ public class CameraController : MonoBehaviour
         if (movement.magnitude > 0)
         {
             movement.Normalize();
-            Vector3 newPosition = transform.position + movement * (moveSpeed * Time.deltaTime);
+            Vector3 newPosition = mainCamera.transform.position + movement * (moveSpeed * Time.deltaTime);
             
             ClampPosition(newPosition);
         }
@@ -182,6 +196,6 @@ public class CameraController : MonoBehaviour
         }
 
         newPosition.z = transform.position.z;
-        transform.position = newPosition;
+        mainCamera.transform.position = newPosition;
     }
 }

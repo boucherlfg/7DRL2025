@@ -55,8 +55,8 @@ public class Tuiles : MonoBehaviour
         {
             int taille = tuilesASupprimer.Count;
             
-            JeuAffichage.Instance.argentGagner += taille - 1 + taille;
-            JeuAffichage.Instance.textArgent.text = $"{JeuAffichage.Instance.argentGagner.ToString()}g";
+            GameManager.Instance.argentGagner += taille - 1 + taille;
+            JeuAffichage.Instance.textArgent.text = $"{GameManager.Instance.argentGagner.ToString()}g";
             
         }
         foreach (Tuiles tuile in tuilesASupprimer)
