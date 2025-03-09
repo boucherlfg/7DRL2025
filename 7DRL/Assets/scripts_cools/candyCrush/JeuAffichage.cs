@@ -66,7 +66,7 @@ public class JeuAffichage : MonoBehaviour
             GameObject itemDemande = Instantiate(tilePrefab);
 
             itemDemande.transform.parent = clientWrapup.transform;
-            itemDemande.transform.position = new Vector3(clientWrapup.transform.position.x, clientWrapup.transform.position.y - 1, -2);
+            itemDemande.transform.position = new Vector3(clientWrapup.transform.position.x, clientWrapup.transform.position.y - 2, -2);
 
             bool itemChoisis = false;
 
@@ -98,11 +98,24 @@ public class JeuAffichage : MonoBehaviour
                 clientsTotal[i].nbEssais = 0;
             }
 
-            for (int i = 0; i<nbClients; i++)
+             int compteur = 0;
+             while(compteur < nbClients)
             {
-                clientsEnAttente.Enqueue(clientsTotal[Random.Range(0,clientsTotal.Count)]);
+            Clients clientRandom = clientsTotal[Random.Range(0,clientsTotal.Count)];
+                if(clientsEnAttente.Count != 0)
+                {
+                    if (clientsEnAttente.Peek() != clientRandom)
+                    {
+                        clientsEnAttente.Enqueue(clientRandom);
+                    }
+                    compteur++;
+                }
+                else
+                {
+                    clientsEnAttente.Enqueue(clientRandom);
+                }
             }
-
+           
             clientActuel = clientsEnAttente.Dequeue();
 
             clientVisuel = Instantiate(clientVidePrefab);
@@ -128,6 +141,7 @@ public class JeuAffichage : MonoBehaviour
             clientActuel.nbEssais = 0;
             clientActuel = clientsEnAttente.Dequeue();
 
+            Debug.Log("APPLIQUE SPRITE");
             clientVisuel.GetComponent<SpriteRenderer>().sprite = clientActuel.sprite;
             ChoisirItemVedette();
         }

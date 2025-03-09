@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: fermier
   m_EditorClassIdentifier: 
   clienType: 0
-  sprite: {fileID: -2413806693520163455, guid: ef91585aa5fb5e2409de37346c16df3a, type: 3}
+  sprite: {fileID: -1057017242206137777, guid: ab1640c474a055e40b50028771869bfa, type: 3}
   itemDemander:
   - {fileID: 11400000, guid: 76ec0c8ae42e42240825ec9b9daeed3c, type: 2}
   - {fileID: 11400000, guid: 94853d6d9b2b21845a8037346b856373, type: 2}
   - {fileID: 11400000, guid: 65089d7cd62ec8c4ba3a4203070b92fa, type: 2}
   nbEssais: 0
+  nbEssaiMax: 3

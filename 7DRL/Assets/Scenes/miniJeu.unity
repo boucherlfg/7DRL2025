@@ -828,6 +828,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2c707f819369d0542b19f1309e4f7076, type: 2}
   - {fileID: 11400000, guid: ee530ea1a1ae6d040844bc84cf62ef7c, type: 2}
   - {fileID: 11400000, guid: c3c27ec359ba41c4b9a931d39a8e8b36, type: 2}
+  - {fileID: 11400000, guid: 385531982ccee064a98d31611251e013, type: 2}
+  - {fileID: 11400000, guid: 87f9b7bb139a1714885a44d24d47949d, type: 2}
   jeu: {fileID: 1662639111}
   clientWrapup: {fileID: 117006234}
   clientVidePrefab: {fileID: 1606150639616605558, guid: 2bae824de90ed2e4e87d34929f9d1f73, type: 3}
